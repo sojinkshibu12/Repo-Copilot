@@ -130,9 +130,20 @@ class Orchestrator:
 
     def _execute_tool_calls(self, session: Session, response: LLMResponse, iteration: int = 0):
         tracer = get_tracer()
+        # Include tool calls in the assistant message so providers like Gemini
+        # and OpenAI can reconstruct the function_call/function_response flow.
+        msg_content = response.content or ""
+        if response.tool_calls:
+            msg_content = {
+                "text": msg_content,
+                "tool_calls": [
+                    {"id": tc["id"], "name": tc["name"], "input": tc["input"]}
+                    for tc in response.tool_calls
+                ],
+            }
         session.messages.append({
             "role": "assistant",
-            "content": response.content or "",
+            "content": msg_content,
         })
 
         for tc in response.tool_calls:

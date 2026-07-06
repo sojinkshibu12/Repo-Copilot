@@ -330,11 +330,45 @@ def _gemini_tools(tools: list[dict]) -> list[dict]:
 
 def _convert_gemini_msg(msg: dict) -> dict:
     role = msg["role"]
+    content = msg.get("content", "")
+
+    # Assistant message with text + optional tool_calls
     if role == "assistant":
-        role = "model"
-    elif role == "system":
-        return {"role": "user", "parts": [msg["content"]]}
-    return {"role": role, "parts": [msg["content"]]}
+        if isinstance(content, dict) and "tool_calls" in content:
+            parts = []
+            if content.get("text"):
+                parts.append({"text": content["text"]})
+            for tc in content["tool_calls"]:
+                parts.append({
+                    "function_call": {
+                        "name": tc["name"],
+                        "args": tc["input"],
+                    }
+                })
+            return {"role": "model", "parts": parts}
+        return {"role": "model", "parts": [{"text": content}] if isinstance(content, str) else content}
+
+    if role == "system":
+        return {"role": "user", "parts": [{"text": content}] if isinstance(content, str) else content}
+
+    # Handle tool_result blocks (list content type from tool responses)
+    if isinstance(content, list):
+        parts = []
+        for block in content:
+            if isinstance(block, dict) and block.get("type") == "tool_result":
+                parts.append({
+                    "function_response": {
+                        "name": block.get("tool_use_id", ""),
+                        "response": {"content": block.get("content", "")},
+                    }
+                })
+            elif isinstance(block, dict):
+                parts.append({"text": json.dumps(block)})
+            else:
+                parts.append({"text": str(block)})
+        return {"role": "user", "parts": parts}
+
+    return {"role": role, "parts": [{"text": content}] if isinstance(content, str) else content}
 
 
 # ---------------------------------------------------------------------------
