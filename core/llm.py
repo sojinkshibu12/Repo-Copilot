@@ -272,36 +272,70 @@ class _GoogleProvider(BaseProvider):
         max_tokens: int = 4096,
         temperature: float = 0.0,
     ) -> LLMResponse:
-        import google.generativeai as genai
-        genai.configure(api_key=self.api_key)
+        import traceback
+        try:
+            return self._chat_impl(
+                messages=messages, tools=tools, system=system,
+                model=model, max_tokens=max_tokens, temperature=temperature,
+            )
+        except Exception as e:
+            logger.error("Google Gemini call failed: %s\n%s", e, traceback.format_exc())
+            return LLMResponse(
+                content=json.dumps({
+                    "classification": "unclear",
+                    "confidence": 0.0,
+                    "explanation": f"Gemini call failed: {e}",
+                }),
+                usage={"input_tokens": 0, "output_tokens": 0},
+                finish_reason="error",
+                model=model,
+            )
 
-        client = genai.GenerativeModel(
-            model_name=model,
-            system_instruction=system,
-            generation_config=dict(max_output_tokens=max_tokens, temperature=temperature),
-            tools=_gemini_tools(tools) if tools else None,
+    def _chat_impl(
+        self,
+        messages: list[dict],
+        tools: list[dict] | None = None,
+        system: str | None = None,
+        model: str = "",
+        max_tokens: int = 4096,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        from google.genai import types
+
+        client = self._get_client()
+
+        config = types.GenerateContentConfig(
+            max_output_tokens=max_tokens,
+            temperature=temperature,
         )
+        if system:
+            config.system_instruction = system
+        if tools:
+            config.tools = _genai_tools(tools)
 
-        history = [_convert_gemini_msg(m) for m in messages]
-        chat = client.start_chat(history=history[:-1]) if len(history) > 1 else client.start_chat()
-        last = history[-1]
+        contents = [_convert_genai_msg(m) for m in messages if _convert_genai_msg(m) is not None]
 
-        response = chat.send_message(last["parts"] if isinstance(last, dict) else last)
-        candidate = response.candidates[0]
-        content = candidate.content
+        response = client.models.generate_content(
+            model=model,
+            contents=contents,
+            config=config,
+        )
 
         text = ""
         tool_calls = []
-        for part in content.parts:
-            if part.text:
-                text += part.text
-            if part.function_call:
-                tc = part.function_call
-                tool_calls.append({
-                    "id": tc.name,
-                    "name": tc.name,
-                    "input": dict(tc.args.items()),
-                })
+        if response.candidates:
+            candidate = response.candidates[0]
+            if candidate.content and candidate.content.parts:
+                for part in candidate.content.parts:
+                    if part.text:
+                        text += part.text
+                    if part.function_call:
+                        tc = part.function_call
+                        tool_calls.append({
+                            "id": tc.name,
+                            "name": tc.name,
+                            "input": {k: v for k, v in tc.args.items()} if hasattr(tc, 'args') else {},
+                        })
 
         usage = response.usage_metadata
         return LLMResponse(
@@ -311,64 +345,63 @@ class _GoogleProvider(BaseProvider):
                 "input_tokens": usage.prompt_token_count if usage else 0,
                 "output_tokens": usage.candidates_token_count if usage else 0,
             },
-            finish_reason=candidate.finish_reason.name if candidate.finish_reason else "",
+            finish_reason=candidate.finish_reason.name if (response.candidates and hasattr(candidate, 'finish_reason') and candidate.finish_reason) else "",
             model=model,
         )
 
+    def _get_client(self):
+        from google.genai import Client
+        return Client(api_key=self.api_key)
 
-def _gemini_tools(tools: list[dict]) -> list[dict]:
-    import google.ai.generativelanguage as glm
+
+def _genai_tools(tools: list[dict]) -> list:
+    from google.genai import types
     func_decls = []
     for t in tools:
-        func_decls.append(glm.FunctionDeclaration(
+        func_decls.append(types.FunctionDeclaration(
             name=t["name"],
             description=t.get("description", ""),
             parameters=t.get("input_schema", {"type": "object", "properties": {}}),
         ))
-    return [glm.Tool(function_declarations=func_decls)]
+    return [types.Tool(function_declarations=func_decls)]
 
 
-def _convert_gemini_msg(msg: dict) -> dict:
+def _convert_genai_msg(msg: dict):
+    from google.genai import types
+
     role = msg["role"]
     content = msg.get("content", "")
 
-    # Assistant message with text + optional tool_calls
+    if role == "system":
+        return None
+
+    parts = []
+
     if role == "assistant":
         if isinstance(content, dict) and "tool_calls" in content:
-            parts = []
             if content.get("text"):
-                parts.append({"text": content["text"]})
+                parts.append(types.Part.from_text(text=content["text"]))
             for tc in content["tool_calls"]:
-                parts.append({
-                    "function_call": {
-                        "name": tc["name"],
-                        "args": tc["input"],
-                    }
-                })
-            return {"role": "model", "parts": parts}
-        return {"role": "model", "parts": [{"text": content}] if isinstance(content, str) else content}
+                parts.append(types.Part.from_function_call(
+                    name=tc["name"], args=tc["input"],
+                ))
+        elif isinstance(content, str):
+            parts.append(types.Part.from_text(text=content))
+        return types.Content(role="model", parts=parts) if parts else None
 
-    if role == "system":
-        return {"role": "user", "parts": [{"text": content}] if isinstance(content, str) else content}
-
-    # Handle tool_result blocks (list content type from tool responses)
     if isinstance(content, list):
-        parts = []
         for block in content:
             if isinstance(block, dict) and block.get("type") == "tool_result":
-                parts.append({
-                    "function_response": {
-                        "name": block.get("tool_use_id", ""),
-                        "response": {"content": block.get("content", "")},
-                    }
-                })
-            elif isinstance(block, dict):
-                parts.append({"text": json.dumps(block)})
-            else:
-                parts.append({"text": str(block)})
-        return {"role": "user", "parts": parts}
+                parts.append(types.Part.from_function_response(
+                    name=block.get("tool_use_id", ""),
+                    response={"content": block.get("content", "")},
+                ))
+        return types.Content(role="user", parts=parts) if parts else None
 
-    return {"role": role, "parts": [{"text": content}] if isinstance(content, str) else content}
+    parts.append(types.Part.from_text(
+        text=content if isinstance(content, str) else json.dumps(content)
+    ))
+    return types.Content(role="user", parts=parts)
 
 
 # ---------------------------------------------------------------------------

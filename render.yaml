@@ -7,7 +7,7 @@ services:
     name: repo-copilot
     runtime: python
     plan: free
-    buildCommand: pip install fastapi uvicorn[standard] psycopg2-binary pydantic httpx python-dotenv anthropic openai google-generativeai pygithub GitPython chromadb sentence-transformers
+    buildCommand: pip install fastapi uvicorn[standard] psycopg2-binary pydantic httpx python-dotenv anthropic openai google-genai pygithub GitPython chromadb sentence-transformers
     startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
