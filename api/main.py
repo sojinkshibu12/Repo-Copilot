@@ -59,6 +59,25 @@ async def lifespan(app: FastAPI):
 
     store = PostgresStore()
     init_store(store)
+
+    global orchestrator
+    try:
+        from core.llm import LLMClient
+        from agent.orchestrator import Orchestrator
+        from agent.tools.retrieval import get_tool_handlers
+        from storage.vector_store import VectorStore
+
+        llm = LLMClient()
+        orch = Orchestrator(llm)
+        orch.register_tool_set(get_tool_handlers(VectorStore()))
+        orch.register_tool("classify_issue", lambda **kw: json.dumps(kw))
+        init_orchestrator(orch)
+        orchestrator = orch
+        logger.info("Orchestrator initialized: provider=%s model=%s",
+                     llm.provider_name, llm.model)
+    except Exception as e:
+        logger.warning("Orchestrator init skipped: %s — issues will get placeholder decisions", e)
+
     logger.info("API started — Postgres store initialized")
     yield
     store.close()
@@ -177,7 +196,6 @@ async def github_webhook(
                         decision_id, issue.number)
         except Exception as e:
             logger.error("Agent execution failed: %s", e)
-            # Save a fallback decision
             fallback = Decision(
                 issue_id=issue_id,
                 classification=Classification.UNCLEAR,
@@ -185,6 +203,15 @@ async def github_webhook(
                 explanation=f"Agent execution failed: {e}",
             )
             decision_id = store.save_decision(fallback)
+    else:
+        # No orchestrator — save a placeholder decision so dashboard shows data
+        fallback = Decision(
+            issue_id=issue_id,
+            classification=Classification.UNCLEAR,
+            action=DecisionAction.COMMENTED,
+            explanation="No agent configured — LLM_PROVIDER=mock or set a real provider",
+        )
+        decision_id = store.save_decision(fallback)
 
     await _broadcast("issue", json.dumps({"issue_id": issue_id, "number": issue.number, "title": issue.title}))
 
