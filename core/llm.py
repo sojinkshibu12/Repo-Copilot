@@ -42,6 +42,7 @@ _SUPPORTED_MODELS: dict[str, tuple[str, str]] = {
     "gpt-4o-mini": ("openai", "gpt-4o-mini"),
     "gpt-4-turbo": ("openai", "gpt-4-turbo"),
     "o3-mini": ("openai", "o3-mini"),
+    "gemini-2.5-flash": ("google", "gemini-2.5-flash"),
     "gemini-2.0-flash": ("google", "gemini-2.0-flash"),
     "gemini-1.5-flash": ("google", "gemini-1.5-flash"),
     "gemini-2.0-pro": ("google", "gemini-2.0-pro-exp-02-05"),
