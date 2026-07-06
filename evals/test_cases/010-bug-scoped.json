@@ -1,0 +1,14 @@
+{
+  "id": "010-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Missing __init__.py in tests directory",
+    "body": "The `tests/` directory is missing an `__init__.py` file, so `pytest` can't discover test modules in subdirectories. Add an empty `__init__.py`.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}

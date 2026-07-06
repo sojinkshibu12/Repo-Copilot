@@ -1,0 +1,14 @@
+{
+  "id": "009-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Rate limiter uses integer division instead of ceiling",
+    "body": "In `src/middleware/ratelimit.py`, the calculation `remaining = max_burst // elapsed` should use `math.ceil` division to avoid granting extra requests on fractional seconds.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}

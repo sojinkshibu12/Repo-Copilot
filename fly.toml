@@ -1,0 +1,44 @@
+# ── Fly.io config ───────────────────────────────────────────────────
+# Deploy with:
+#   fly launch --image .
+#   fly secrets set DATABASE_URL=... ANTHROPIC_API_KEY=... OPENAI_API_KEY=...
+#   fly deploy
+
+app = "repo-copilot"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8000
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+[env]
+  TRACE_EMITTER = "json"
+  LLM_PROVIDER = "mock"
+  EMBEDDING_PROVIDER = "mock"
+  LOG_LEVEL = "INFO"
+  PYTHONUNBUFFERED = "1"
+  PYTHONDONTWRITEBYTECODE = "1"
+
+[metrics]
+  port = 8000
+  path = "/health"

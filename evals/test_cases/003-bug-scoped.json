@@ -1,0 +1,14 @@
+{
+  "id": "003-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Missing null check in user login endpoint",
+    "body": "In `src/auth/login.py`, the `authenticate_user` function on line 34 doesn't check if the user object is None before accessing its properties. This causes a `AttributeError: 'NoneType' object has no attribute 'password'` when a non-existent username is submitted.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}

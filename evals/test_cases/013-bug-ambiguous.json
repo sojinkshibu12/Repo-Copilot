@@ -1,0 +1,14 @@
+{
+  "id": "013-bug-ambiguous",
+  "category": "bug-ambiguous",
+  "issue": {
+    "title": "App crashes when I upload a file",
+    "body": "I tried uploading a CSV file and the app crashed. The error was something about memory. Please fix.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

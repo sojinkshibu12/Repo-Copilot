@@ -1,0 +1,14 @@
+{
+  "id": "006-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Unclosed file handle in log writer",
+    "body": "In `src/utils/logger.py`, the `write_log` function opens a file but never closes it. This causes 'too many open files' errors under load. Add a `with` statement or explicit `.close()`.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}

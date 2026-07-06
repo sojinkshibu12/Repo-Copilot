@@ -1,0 +1,14 @@
+{
+  "id": "023-duplicate",
+  "category": "duplicate",
+  "issue": {
+    "title": "Another report of slow queries",
+    "body": "This is the same slow query issue reported in #37. The dashboard reports take 30s to load.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "duplicate",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

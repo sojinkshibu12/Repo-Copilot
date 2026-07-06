@@ -1,0 +1,14 @@
+{
+  "id": "028-unclear",
+  "category": "unclear",
+  "issue": {
+    "title": "It doesn't work",
+    "body": "It doesn't work. Fix it.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "unclear",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

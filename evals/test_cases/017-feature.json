@@ -1,0 +1,14 @@
+{
+  "id": "017-feature",
+  "category": "feature",
+  "issue": {
+    "title": "Export data as CSV from dashboard",
+    "body": "It would be useful if users could export their data as CSV from the dashboard. This would help with data analysis workflows.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "feature",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

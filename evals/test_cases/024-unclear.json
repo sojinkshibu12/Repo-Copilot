@@ -1,0 +1,14 @@
+{
+  "id": "024-unclear",
+  "category": "unclear",
+  "issue": {
+    "title": "My computer won't turn on",
+    "body": "Since I installed your software, my computer won't turn on. Please help.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "unclear",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

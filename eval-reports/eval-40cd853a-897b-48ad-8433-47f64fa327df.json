@@ -1,0 +1,268 @@
+{
+  "run_id": "40cd853a-897b-48ad-8433-47f64fa327df",
+  "timestamp": "2026-07-06T10:28:38.228951+00:00",
+  "overall_score": 1.0,
+  "classification_accuracy": 1.0,
+  "action_accuracy": 1.0,
+  "pr_correctness": 1.0,
+  "total": 28,
+  "failures": 0,
+  "categories": [
+    {
+      "name": "bug-ambiguous",
+      "total": 3,
+      "classification_correct": 3,
+      "action_correct": 3
+    },
+    {
+      "name": "bug-scoped",
+      "total": 12,
+      "classification_correct": 12,
+      "action_correct": 12
+    },
+    {
+      "name": "duplicate",
+      "total": 3,
+      "classification_correct": 3,
+      "action_correct": 3
+    },
+    {
+      "name": "feature",
+      "total": 5,
+      "classification_correct": 5,
+      "action_correct": 5
+    },
+    {
+      "name": "unclear",
+      "total": 5,
+      "classification_correct": 5,
+      "action_correct": 5
+    }
+  ],
+  "results": [
+    {
+      "case_id": "001-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "002-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "003-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "004-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "005-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "006-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "007-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "008-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "009-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "010-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "011-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "012-bug-scoped",
+      "category": "bug-scoped",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "013-bug-ambiguous",
+      "category": "bug-ambiguous",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "014-bug-ambiguous",
+      "category": "bug-ambiguous",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "015-bug-ambiguous",
+      "category": "bug-ambiguous",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "016-feature",
+      "category": "feature",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "017-feature",
+      "category": "feature",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "018-feature",
+      "category": "feature",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "019-feature",
+      "category": "feature",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "020-feature",
+      "category": "feature",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "021-duplicate",
+      "category": "duplicate",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "022-duplicate",
+      "category": "duplicate",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "023-duplicate",
+      "category": "duplicate",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "024-unclear",
+      "category": "unclear",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "025-unclear",
+      "category": "unclear",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "026-unclear",
+      "category": "unclear",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "027-unclear",
+      "category": "unclear",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    },
+    {
+      "case_id": "028-unclear",
+      "category": "unclear",
+      "classification_correct": true,
+      "action_correct": true,
+      "errors": [],
+      "judge_scores": null
+    }
+  ]
+}

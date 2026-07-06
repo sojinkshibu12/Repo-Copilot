@@ -1,0 +1,14 @@
+{
+  "id": "012-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Sorting function mutates input list",
+    "body": "The `sort_results` function in `src/utils/sorting.py` calls `.sort()` on the input list in-place instead of using `sorted()`. This mutates the caller's data unexpectedly.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}

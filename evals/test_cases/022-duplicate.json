@@ -1,0 +1,14 @@
+{
+  "id": "022-duplicate",
+  "category": "duplicate",
+  "issue": {
+    "title": "Duplicate: Login crash (same as #18)",
+    "body": "I'm also getting the login crash that was described in issue #18. Same error message and everything.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "duplicate",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

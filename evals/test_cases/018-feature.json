@@ -1,0 +1,14 @@
+{
+  "id": "018-feature",
+  "category": "feature",
+  "issue": {
+    "title": "Add webhook support for new user signups",
+    "body": "Please add a webhook that fires when a new user signs up. We want to integrate with our CRM in real time.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "feature",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

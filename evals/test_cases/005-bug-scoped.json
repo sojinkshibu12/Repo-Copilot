@@ -1,0 +1,14 @@
+{
+  "id": "005-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Broken link in footer documentation",
+    "body": "The 'API Reference' link in the footer points to `/docs/api/v1` which returns a 404. It should point to `/docs/api/v2`.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}

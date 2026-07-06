@@ -1,0 +1,14 @@
+{
+  "id": "016-feature",
+  "category": "feature",
+  "issue": {
+    "title": "Add dark mode support",
+    "body": "It would be great if the app had a dark mode toggle. Many users have requested this feature for better nighttime usability.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "feature",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

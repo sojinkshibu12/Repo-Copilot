@@ -1,0 +1,14 @@
+{
+  "id": "025-unclear",
+  "category": "unclear",
+  "issue": {
+    "title": "App crashes sometimes",
+    "body": "Hi, I was using the app and it crashed. I don't remember what I was doing. Can you fix it?",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "unclear",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

@@ -1,0 +1,49 @@
+# ── Render Blueprint ────────────────────────────────────────────────
+# Deploy with: one-click from GitHub via Render Dashboard
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: repo-copilot
+    runtime: python
+    plan: starter  # $7/mo — free tier available
+    buildCommand: pip install -r requirements.txt 2>/dev/null || pip install fastapi uvicorn[standard] psycopg2-binary anthropic openai google-generativeai pygithub GitPython chromadb pydantic httpx python-dotenv sentence-transformers
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: repo-copilot-db
+          property: connectionString
+      - key: TRACE_EMITTER
+        value: json
+      - key: LLM_PROVIDER
+        value: mock
+      - key: EMBEDDING_PROVIDER
+        value: mock
+      - key: LOG_LEVEL
+        value: INFO
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: GITHUB_WEBHOOK_SECRET
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_WATCHED_REPO
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+
+  - type: pserv
+    name: repo-copilot-db
+    plan: starter
+    runtime: postgres
+    envVars:
+      - key: POSTGRES_DB
+        value: repocopilot
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_PASSWORD
+        value: postgres

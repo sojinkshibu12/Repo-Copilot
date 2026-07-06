@@ -1,0 +1,14 @@
+{
+  "id": "004-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Database connection timeout on deployment",
+    "body": "The DATABASE_URL environment variable in production points to `localhost:5432` instead of the RDS endpoint. Change it in the deployment config.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}

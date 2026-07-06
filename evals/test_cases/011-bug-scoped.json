@@ -1,0 +1,14 @@
+{
+  "id": "011-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Memory leak in WebSocket handler",
+    "body": "In `src/handlers/websocket.py`, connected clients are stored in a `set` but never removed on disconnect. This causes unbounded memory growth. Add a `finally` block to remove the client.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}

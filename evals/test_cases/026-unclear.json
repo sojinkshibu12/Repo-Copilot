@@ -1,0 +1,14 @@
+{
+  "id": "026-unclear",
+  "category": "unclear",
+  "issue": {
+    "title": "Can you add more features?",
+    "body": "Your app is good but it needs more features. Make it better.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "unclear",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

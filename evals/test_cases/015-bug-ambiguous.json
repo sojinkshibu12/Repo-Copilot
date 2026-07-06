@@ -1,0 +1,14 @@
+{
+  "id": "015-bug-ambiguous",
+  "category": "bug-ambiguous",
+  "issue": {
+    "title": "Performance is slow in production",
+    "body": "Since the last deploy, the app feels sluggish. Pages take 5-10 seconds to load. Not sure what changed.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

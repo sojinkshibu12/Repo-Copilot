@@ -1,0 +1,14 @@
+{
+  "id": "019-feature",
+  "category": "feature",
+  "issue": {
+    "title": "Implement two-factor authentication",
+    "body": "Security is a growing concern. We need TOTP-based two-factor authentication for admin accounts.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "feature",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

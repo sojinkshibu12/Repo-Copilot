@@ -1,0 +1,14 @@
+{
+  "id": "014-bug-ambiguous",
+  "category": "bug-ambiguous",
+  "issue": {
+    "title": "Login button sometimes doesn't work",
+    "body": "Sometimes when I click the login button nothing happens. It seems random. I'm using Chrome on Windows.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "027-unclear",
+  "category": "unclear",
+  "issue": {
+    "title": "I have an idea",
+    "body": "I think you should improve the app. Let me know if you want to hear my idea.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "unclear",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

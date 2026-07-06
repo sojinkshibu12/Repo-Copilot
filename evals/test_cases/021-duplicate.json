@@ -1,0 +1,14 @@
+{
+  "id": "021-duplicate",
+  "category": "duplicate",
+  "issue": {
+    "title": "This was already reported in issue #42",
+    "body": "This is the same issue as #42 \u2014 the button alignment problem on mobile. Please close this and track it there.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "duplicate",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

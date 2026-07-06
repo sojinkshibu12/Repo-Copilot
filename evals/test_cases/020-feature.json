@@ -1,0 +1,14 @@
+{
+  "id": "020-feature",
+  "category": "feature",
+  "issue": {
+    "title": "Add pagination to the search results page",
+    "body": "Search currently returns all results at once. For large result sets this is slow. Add pagination with 20 items per page.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "feature",
+    "action": "commented",
+    "requires_comment": true
+  }
+}

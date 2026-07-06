@@ -1,0 +1,14 @@
+{
+  "id": "007-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Incorrect import path for ConfigParser",
+    "body": "Line 3 of `src/config.py` says `from configparser import ConfigParser` but the module is at `src/utils/config_parser.py`. The import should be `from src.utils.config_parser import ConfigParser`.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}

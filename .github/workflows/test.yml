@@ -1,0 +1,56 @@
+name: Test & Eval
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install fastapi uvicorn pytest pytest-cov httpx
+          pip install -r requirements.txt 2>/dev/null || true
+
+      - name: Run all tests
+        run: pytest tests/ -v --cov=agent --cov=core --cov=storage --cov=evals --cov=api --cov-report=xml --cov-report=term
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+
+      - name: Verify test cases exist
+        run: |
+          count=$(ls evals/test_cases/*.json 2>/dev/null | wc -l)
+          echo "Test cases: $count"
+          if [ "$count" -lt 20 ]; then
+            echo "ERROR: Expected at least 20 test cases, found $count"
+            exit 1
+          fi
+
+      - name: Run eval suite (mock, baseline)
+        run: python scripts/run_evals.py --mock --verbose --report --format json --format markdown
+
+      - name: Run eval suite with minimum accuracy gate
+        run: python scripts/run_evals.py --mock --min-accuracy 0.8
+
+      - name: Upload eval reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-reports
+          path: eval-reports/
+          retention-days: 30

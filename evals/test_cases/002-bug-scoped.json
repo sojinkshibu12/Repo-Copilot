@@ -1,0 +1,14 @@
+{
+  "id": "002-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Off-by-one error in pagination when page > total",
+    "body": "In `src/utils/pagination.py`, the `get_page` function returns an extra empty page when the requested page number exceeds the total number of pages. The condition on line 23 should use `>=` instead of `>`.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "001-bug-scoped",
+  "category": "bug-scoped",
+  "issue": {
+    "title": "Typo in README: 'instalation' should be 'installation'",
+    "body": "On line 42 of README.md, there's a typo: 'instalation' should be 'installation'. Quick fix.",
+    "repo": "owner/repo"
+  },
+  "expected": {
+    "classification": "bug",
+    "action": "opened_pr",
+    "requires_comment": false
+  }
+}
