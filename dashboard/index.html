@@ -180,6 +180,15 @@
   .dist-bar .dist-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
   .dist-bar .dist-count { width: 30px; text-align: right; font-size: 0.8rem; font-weight: 600; }
 
+  .btn-reprocess {
+    background: none; border: 1px solid var(--border); border-radius: 4px;
+    cursor: pointer; color: var(--text-muted); font-size: 1rem;
+    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn-reprocess:hover { background: var(--surface-2); color: var(--accent); border-color: var(--accent); }
+  .btn-reprocess:disabled { opacity: 0.5; cursor: not-allowed; }
+
   @media (max-width: 768px) {
     .grid-2 { grid-template-columns: 1fr; }
     .container { padding: 1rem; }
@@ -259,8 +268,8 @@
 <script>
 const API = "";
 
-async function api(path) {
-  const r = await fetch(API + path);
+async function api(path, opts) {
+  const r = await fetch(API + path, opts || {});
   if (!r.ok) throw new Error(r.status + " " + (await r.text()).slice(0, 80));
   return r.json();
 }
@@ -329,7 +338,7 @@ async function loadIssues() {
       document.getElementById("issues-table").innerHTML = '<div class="empty"><p>No issues processed yet</p><div class="hint">Send a webhook or seed some data to get started</div></div>';
       return;
     }
-    let html = `<table><thead><tr><th>Issue</th><th>Classification</th><th>Action</th><th>PR</th><th>Time</th></tr></thead><tbody>`;
+    let html = `<table><thead><tr><th>Issue</th><th>Classification</th><th>Action</th><th>PR</th><th>Time</th><th></th></tr></thead><tbody>`;
     for (const iss of items) {
       const cls = iss.classification || "—";
       const act = iss.action_taken || "—";
@@ -342,12 +351,26 @@ async function loadIssues() {
         <td>${actTag}</td>
         <td>${prLink}</td>
         <td style="font-size:0.8rem;color:var(--text-muted)">${fmtDate(iss.decision_created_at || iss.created_at)}</td>
+        <td><button class="btn-reprocess" data-id="${iss.id}" onclick="reprocessIssue(${iss.id})" title="Run agent again">↻</button></td>
       </tr>`;
     }
     html += "</tbody></table>";
     document.getElementById("issues-table").innerHTML = html;
   } catch (e) {
     document.getElementById("issues-table").innerHTML = `<div class="empty"><p>Failed to load issues</p><div class="hint">${e.message}</div></div>`;
+  }
+}
+
+async function reprocessIssue(id) {
+  const btn = document.querySelector(`.btn-reprocess[data-id="${id}"]`);
+  btn.disabled = true;
+  btn.textContent = "⟳";
+  try {
+    await api(`/api/issues/${id}/reprocess`, { method: "POST" });
+    loadIssues();
+  } catch (e) {
+    btn.textContent = "✗";
+    setTimeout(() => { btn.disabled = false; btn.textContent = "↻"; }, 2000);
   }
 }
 

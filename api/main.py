@@ -239,6 +239,57 @@ async def list_issues(
     return _paginate(result.items, result.total, page, per_page)
 
 
+@app.post("/api/issues/{issue_id}/reprocess", tags=["Issues"])
+async def reprocess_issue(
+    issue_id: int,
+    store: PostgresStore = Depends(get_store),
+):
+    """Re-run the agent on an existing issue — replaces the latest decision."""
+    data = store.get_issue(issue_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Issue not found")
+
+    issue = Issue(
+        id=data.get("gh_id", 0),
+        repo=data["repo"],
+        number=data["number"],
+        title=data["title"],
+        body=data.get("body", ""),
+        author=data.get("author", "unknown"),
+        labels=data.get("labels", []),
+        url=data.get("url", ""),
+    )
+
+    decision_id = None
+    if orchestrator is not None:
+        try:
+            decision = orchestrator.run(issue)
+            decision.issue_id = issue_id
+            decision_id = store.save_decision(decision)
+            logger.info("Issue %d reprocessed: decision=%d", issue_id, decision_id)
+        except Exception as e:
+            logger.error("Reprocess failed for issue %d: %s", issue_id, e)
+            fallback = Decision(
+                issue_id=issue_id,
+                classification=Classification.UNCLEAR,
+                action=DecisionAction.NO_ACTION,
+                explanation=f"Reprocess failed: {e}",
+            )
+            decision_id = store.save_decision(fallback)
+    else:
+        fallback = Decision(
+            issue_id=issue_id,
+            classification=Classification.UNCLEAR,
+            action=DecisionAction.COMMENTED,
+            explanation="No agent configured",
+        )
+        decision_id = store.save_decision(fallback)
+
+    await _broadcast("issue", json.dumps({"issue_id": issue_id, "number": issue.number, "title": issue.title, "reprocessed": True}))
+
+    return {"status": "ok", "decision_id": decision_id, "issue_id": issue_id}
+
+
 @app.get("/api/issues/{issue_id}", response_model=IssueDetail, tags=["Issues"])
 async def get_issue(
     issue_id: int,
