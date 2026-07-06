@@ -468,11 +468,25 @@ async function loadHealth() {
 async function init() {
   await loadHealth();
   await Promise.all([loadStats(), loadIssues(), loadEvalRuns()]);
+  connectSSE();
 }
 init();
 
-// Auto-refresh every 30s
+// Fallback polling (every 30s)
 setInterval(() => { loadStats(); loadIssues(); }, 30000);
+
+// ── Real-time via SSE ───────────────────────────────────────────
+
+function connectSSE() {
+  const es = new EventSource("/api/events");
+  es.addEventListener("issue", () => { loadStats(); loadIssues(); });
+  es.addEventListener("eval", () => { loadStats(); loadEvalRuns(); });
+  es.onerror = () => {
+    // SSE connection lost — polling fallback handles it
+    es.close();
+    setTimeout(connectSSE, 5000);
+  };
+}
 </script>
 </body>
 </html>

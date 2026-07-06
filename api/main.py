@@ -13,6 +13,8 @@ Exposes:
   - GET  /health              — health check
 """
 
+import asyncio
+import json
 import logging
 import os
 import time
@@ -23,7 +25,7 @@ from typing import Optional
 
 from fastapi import FastAPI, Request, HTTPException, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 
 from core.tracer import get_tracer, set_tracer, Tracer
 
@@ -184,6 +186,8 @@ async def github_webhook(
             )
             decision_id = store.save_decision(fallback)
 
+    await _broadcast("issue", json.dumps({"issue_id": issue_id, "number": issue.number, "title": issue.title}))
+
     return WebhookResponse(
         status="processed",
         decision_id=decision_id,
@@ -247,6 +251,50 @@ async def get_decision(
     )
 
 
+# ── Event bus for SSE ──────────────────────────────────────────────
+
+_subscribers: list[asyncio.Queue] = []
+_sse_lock = asyncio.Lock()
+
+
+async def _broadcast(event: str, data: str):
+    async with _sse_lock:
+        for q in _subscribers:
+            await q.put(f"event: {event}\ndata: {data}\n\n")
+
+
+async def _subscribe() -> asyncio.Queue:
+    q: asyncio.Queue = asyncio.Queue()
+    async with _sse_lock:
+        _subscribers.append(q)
+    return q
+
+
+async def _unsubscribe(q: asyncio.Queue):
+    async with _sse_lock:
+        if q in _subscribers:
+            _subscribers.remove(q)
+
+
+@app.get("/api/events", tags=["Dashboard"])
+async def event_stream(request: Request):
+    """Server-Sent Events endpoint — pushes real-time updates to the dashboard."""
+    q = await _subscribe()
+    async def generator():
+        try:
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    msg = await asyncio.wait_for(q.get(), timeout=30)
+                    yield msg
+                except asyncio.TimeoutError:
+                    yield "event: ping\ndata: {}\n\n"
+        finally:
+            await _unsubscribe(q)
+    return StreamingResponse(generator(), media_type="text/event-stream")
+
+
 # ── Stats ─────────────────────────────────────────────────────────
 
 @app.get("/api/stats", response_model=StatsResponse, tags=["Dashboard"])
@@ -307,6 +355,8 @@ async def trigger_eval(
 
     # Generate report files
     ReportGenerator().generate(report, formats=["json", "markdown"])
+
+    await _broadcast("eval", json.dumps({"run_id": run_id, "overall_score": report.overall_score}))
 
     return {
         "status": "completed",
