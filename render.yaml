@@ -6,13 +6,12 @@ services:
   - type: web
     name: repo-copilot
     runtime: python
-    plan: starter  # $7/mo — free tier available
-    buildCommand: pip install -r requirements.txt 2>/dev/null || pip install fastapi uvicorn[standard] psycopg2-binary anthropic openai google-generativeai pygithub GitPython chromadb pydantic httpx python-dotenv sentence-transformers
+    plan: free
+    buildCommand: pip install fastapi uvicorn[standard] psycopg2-binary pydantic httpx python-dotenv anthropic openai google-generativeai pygithub GitPython chromadb sentence-transformers
     startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
-        fromService:
-          type: pserv
+        fromDatabase:
           name: repo-copilot-db
           property: connectionString
       - key: TRACE_EMITTER
@@ -35,15 +34,11 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
 
-  - type: pserv
-    name: repo-copilot-db
-    plan: starter
-    runtime: postgres
-    envVars:
-      - key: POSTGRES_DB
-        value: repocopilot
-      - key: POSTGRES_USER
-        value: postgres
-      - key: POSTGRES_PASSWORD
-        value: postgres
+databases:
+  - name: repo-copilot-db
+    databaseName: repocopilot
+    user: repocopilot
+    plan: free
