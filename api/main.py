@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 # ── Global state (set during lifespan) ─────────────────────────────
 
 orchestrator = None
+_op_tools = None
 _start_time: float = 0.0
 
 
@@ -60,19 +61,28 @@ async def lifespan(app: FastAPI):
     store = PostgresStore()
     init_store(store)
 
-    global orchestrator
+    global orchestrator, _op_tools
     try:
         from core.llm import LLMClient
         from agent.orchestrator import Orchestrator
         from agent.tools.retrieval import RetrievalToolSet
+        from agent.tools.operations import OperationToolSet
         from storage.vector_store import VectorStore
 
         llm = LLMClient()
         orch = Orchestrator(llm)
-        orch.register_tool_set(RetrievalToolSet(VectorStore()).get_tool_handlers())
+        ret_tools = RetrievalToolSet(VectorStore())
+        orch.register_tool_set(ret_tools.get_tool_handlers())
+        ops = OperationToolSet(
+            repo_path=os.environ.get("REPO_LOCAL_PATH", "."),
+            github_token=os.environ.get("GITHUB_TOKEN", ""),
+            github_repo=os.environ.get("GITHUB_WATCHED_REPO", ""),
+        )
+        orch.register_tool_set(ops.get_tool_handlers())
         orch.register_tool("classify_issue", lambda **kw: json.dumps(kw))
         init_orchestrator(orch)
         orchestrator = orch
+        _op_tools = ops
         logger.info("Orchestrator initialized: provider=%s model=%s",
                      llm.provider_name, llm.model)
     except Exception as e:
@@ -155,8 +165,18 @@ async def dashboard():
 
 @app.get("/health", response_model=HealthResponse, tags=["System"])
 async def health():
+    prov = None
+    model = None
+    tools = 0
+    if orchestrator is not None:
+        prov = getattr(orchestrator.llm, "provider_name", None)
+        model = getattr(orchestrator.llm, "model", None)
+        tools = len(orchestrator._tool_handlers) if hasattr(orchestrator, "_tool_handlers") else 0
     return HealthResponse(
         uptime_seconds=time.time() - _start_time,
+        llm_provider=prov,
+        llm_model=model,
+        tools_registered=tools,
     )
 
 
@@ -189,6 +209,8 @@ async def github_webhook(
     decision_id = None
     if orchestrator is not None:
         try:
+            if _op_tools is not None:
+                _op_tools.set_current_issue(issue.number)
             decision = orchestrator.run(issue)
             decision.issue_id = issue_id
             decision_id = store.save_decision(decision)
@@ -263,6 +285,8 @@ async def reprocess_issue(
     decision_id = None
     if orchestrator is not None:
         try:
+            if _op_tools is not None:
+                _op_tools.set_current_issue(issue.number)
             decision = orchestrator.run(issue)
             decision.issue_id = issue_id
             decision_id = store.save_decision(decision)

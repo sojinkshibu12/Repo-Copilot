@@ -189,6 +189,22 @@
   .btn-reprocess:hover { background: var(--surface-2); color: var(--accent); border-color: var(--accent); }
   .btn-reprocess:disabled { opacity: 0.5; cursor: not-allowed; }
 
+  #toast-container {
+    position: fixed; top: 1rem; right: 1rem; z-index: 999;
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .toast {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.6rem 1rem;
+    font-size: 0.8rem; color: var(--text);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    animation: slideIn 0.3s ease;
+    max-width: 360px;
+  }
+  .toast.success { border-color: var(--green); }
+  .toast.error { border-color: var(--red); }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+
   @media (max-width: 768px) {
     .grid-2 { grid-template-columns: 1fr; }
     .container { padding: 1rem; }
@@ -264,6 +280,7 @@
 </div>
 
 <div class="tooltip" id="tooltip"></div>
+<div id="toast-container"></div>
 
 <script>
 const API = "";
@@ -343,11 +360,13 @@ async function loadIssues() {
       const cls = iss.classification || "—";
       const act = iss.action_taken || "—";
       const clsTag = tag(cls, cls === "opened_pr" ? "bug" : cls);
+      const clsTitle = iss.explanation ? ` title="${escHtml(iss.explanation).slice(0, 200)}"` : "";
       const actTag = tag(act.replace("_", " "), act);
       const prLink = iss.pr_url ? `<a href="${iss.pr_url}" target="_blank">#${iss.pr_url.split("/").pop()}</a>` : "—";
+      const isMock = iss.explanation && iss.explanation.includes("Mock") ? " (mock)" : "";
       html += `<tr>
-        <td><a href="${iss.url || "#"}" target="_blank" title="${escHtml(iss.body || "").slice(0, 120)}">${escHtml(iss.title).slice(0, 60)}</a><br><span style="font-size:0.75rem;color:var(--text-muted)">#${iss.number} · ${iss.repo}</span></td>
-        <td>${clsTag}</td>
+        <td><a href="${iss.url || "#"}" target="_blank" title="${escHtml(iss.body || "").slice(0, 120)}">${escHtml(iss.title).slice(0, 60)}</a>${isMock}<br><span style="font-size:0.75rem;color:var(--text-muted)">#${iss.number} · ${iss.repo}</span></td>
+        <td><span class="label-tag ${cls}"${clsTitle}>${cls}</span></td>
         <td>${actTag}</td>
         <td>${prLink}</td>
         <td style="font-size:0.8rem;color:var(--text-muted)">${fmtDate(iss.decision_created_at || iss.created_at)}</td>
@@ -366,12 +385,22 @@ async function reprocessIssue(id) {
   btn.disabled = true;
   btn.textContent = "⟳";
   try {
-    await api(`/api/issues/${id}/reprocess`, { method: "POST" });
+    const result = await api(`/api/issues/${id}/reprocess`, { method: "POST" });
+    toast("Reprocessed issue #" + id, "success");
     loadIssues();
   } catch (e) {
     btn.textContent = "✗";
+    toast("Reprocess failed: " + e.message, "error");
     setTimeout(() => { btn.disabled = false; btn.textContent = "↻"; }, 2000);
   }
+}
+
+function toast(msg, type) {
+  const el = document.createElement("div");
+  el.className = "toast" + (type ? " " + type : "");
+  el.textContent = msg;
+  document.getElementById("toast-container").appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity 0.3s"; setTimeout(() => el.remove(), 300); }, 3000);
 }
 
 function escHtml(s) {
@@ -478,7 +507,12 @@ async function runEval() {
 async function loadHealth() {
   try {
     const h = await api("/health");
-    document.getElementById("header-status").textContent = "v" + h.version + " · live";
+    let label = "live";
+    if (h.llm_provider && h.llm_model) {
+      label = h.llm_provider + " · " + (h.llm_model.includes("/") ? h.llm_model.split("/").pop() : h.llm_model);
+      if (h.tools_registered > 0) label += " · " + h.tools_registered + " tools";
+    }
+    document.getElementById("header-status").textContent = label;
     document.getElementById("header-status").style.color = "var(--green)";
   } catch (e) {
     document.getElementById("header-status").textContent = "offline";

@@ -9,6 +9,9 @@ class HealthResponse(BaseModel):
     status: str = "ok"
     version: str = "0.1.0"
     uptime_seconds: float = 0.0
+    llm_provider: Optional[str] = None
+    llm_model: Optional[str] = None
+    tools_registered: int = 0
 
 
 # ── Issues ─────────────────────────────────────────────────────────────
