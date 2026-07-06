@@ -64,12 +64,12 @@ async def lifespan(app: FastAPI):
     try:
         from core.llm import LLMClient
         from agent.orchestrator import Orchestrator
-        from agent.tools.retrieval import get_tool_handlers
+        from agent.tools.retrieval import RetrievalToolSet
         from storage.vector_store import VectorStore
 
         llm = LLMClient()
         orch = Orchestrator(llm)
-        orch.register_tool_set(get_tool_handlers(VectorStore()))
+        orch.register_tool_set(RetrievalToolSet(VectorStore()).get_tool_handlers())
         orch.register_tool("classify_issue", lambda **kw: json.dumps(kw))
         init_orchestrator(orch)
         orchestrator = orch
