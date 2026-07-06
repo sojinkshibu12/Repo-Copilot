@@ -32,6 +32,7 @@ chroma_data/
 # ── Eval reports ─────────────────────────────────────────────────
 evals/reports/
 evals/results/
+eval-reports/
 
 # ── Docker ───────────────────────────────────────────────────────
 .docker/

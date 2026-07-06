@@ -17,9 +17,11 @@ services:
       - key: TRACE_EMITTER
         value: json
       - key: LLM_PROVIDER
-        value: mock
+        value: google
+      - key: LLM_MODEL
+        value: gemini-2.0-flash
       - key: EMBEDDING_PROVIDER
-        value: mock
+        value: google
       - key: LOG_LEVEL
         value: INFO
       - key: PYTHONUNBUFFERED
