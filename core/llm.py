@@ -46,6 +46,8 @@ _SUPPORTED_MODELS: dict[str, tuple[str, str]] = {
     "gemini-2.0-flash": ("google", "gemini-2.0-flash"),
     "gemini-1.5-flash": ("google", "gemini-1.5-flash"),
     "gemini-2.0-pro": ("google", "gemini-2.0-pro-exp-02-05"),
+    "deepseek-v4-flash": ("deepseek", "deepseek-v4-flash"),
+    "deepseek-v4-pro": ("deepseek", "deepseek-v4-pro"),
     "openrouter/o1": ("openrouter", "o1"),
     "openrouter/claude-sonnet": ("openrouter", "anthropic/claude-sonnet-4"),
     "openrouter/gpt-4o": ("openrouter", "openai/gpt-4o"),
@@ -89,6 +91,7 @@ class LLMClient:
             "openai": _OpenAIProvider,
             "google": _GoogleProvider,
             "openrouter": _OpenRouterProvider,
+            "deepseek": _DeepSeekProvider,
             "ollama": _OllamaProvider,
             "mock": _MockProvider,
         }
@@ -139,7 +142,7 @@ class LLMClient:
 
     @property
     def provider_name(self) -> str:
-        return type(self._provider).__name__.replace("Provider", "").lower()
+        return type(self._provider).__name__.replace("Provider", "").lstrip("_").lower()
 
 
 # ---------------------------------------------------------------------------
@@ -427,6 +430,66 @@ class _OpenRouterProvider(BaseProvider):
         client = OpenAI(
             api_key=self.api_key,
             base_url="https://openrouter.ai/api/v1",
+        )
+
+        body = dict(model=model, max_tokens=max_tokens, temperature=temperature)
+
+        if system:
+            body["messages"] = [{"role": "system", "content": system}] + messages
+        else:
+            body["messages"] = messages
+
+        if tools:
+            body["tools"] = _openai_tools(tools)
+
+        response = client.chat.completions.create(**body)
+        choice = response.choices[0]
+        msg = choice.message
+
+        tool_calls = []
+        if msg.tool_calls:
+            for tc in msg.tool_calls:
+                args = {}
+                try:
+                    args = json.loads(tc.function.arguments)
+                except json.JSONDecodeError:
+                    args = {"raw": tc.function.arguments}
+                tool_calls.append({"id": tc.id, "name": tc.function.name, "input": args})
+
+        usage = response.usage
+        return LLMResponse(
+            content=msg.content or None,
+            tool_calls=tool_calls,
+            usage={
+                "input_tokens": usage.prompt_tokens if usage else 0,
+                "output_tokens": usage.completion_tokens if usage else 0,
+            },
+            finish_reason=choice.finish_reason or "",
+            model=model,
+        )
+
+
+# ---------------------------------------------------------------------------
+# DeepSeek (OpenAI-compatible, https://api.deepseek.com)
+# ---------------------------------------------------------------------------
+
+class _DeepSeekProvider(BaseProvider):
+    def __init__(self, api_key: str | None = None):
+        self.api_key = api_key or os.environ.get("DEEPSEEK_API_KEY", "")
+
+    def chat(
+        self,
+        messages: list[dict],
+        tools: list[dict] | None = None,
+        system: str | None = None,
+        model: str = "",
+        max_tokens: int = 4096,
+        temperature: float = 0.0,
+    ) -> LLMResponse:
+        from openai import OpenAI
+        client = OpenAI(
+            api_key=self.api_key,
+            base_url="https://api.deepseek.com/v1",
         )
 
         body = dict(model=model, max_tokens=max_tokens, temperature=temperature)
