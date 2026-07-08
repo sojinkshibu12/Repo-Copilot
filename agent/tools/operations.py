@@ -49,25 +49,34 @@ class OperationToolSet:
         if not search_root.exists():
             return f"Path not found: {path or self.repo_path}"
 
+        # Try ripgrep first, fall back to grep
         cmd = ["rg", "-n", pattern, str(search_root)]
         if include:
             cmd.extend(["-g", include])
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            if result.returncode == 0:
-                output = result.stdout.strip()
-                if not output:
-                    return f"No matches for '{pattern}'" + (f" in {include}" if include else "")
-                lines = output.splitlines()
-                return f"Found {len(lines)} match(es):\n" + "\n".join(lines[:50]) + ("\n..." if len(lines) > 50 else "")
-            elif result.returncode == 1:
-                return f"No matches for '{pattern}'" + (f" in {include}" if include else "")
-            else:
-                return f"Search failed (code {result.returncode}): {result.stderr.strip() or result.stdout.strip()[:200]}"
         except FileNotFoundError:
-            return "ripgrep (rg) not installed. Try glob or semantic_search instead."
-        except subprocess.TimeoutExpired:
-            return f"Search timed out for '{pattern}'"
+            # ripgrep not installed — fall back to standard grep
+            cmd = ["grep", "-rn", pattern, str(search_root)]
+            if include:
+                cmd.extend(["--include", include])
+            try:
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            except FileNotFoundError:
+                return "No search tool available (install ripgrep or grep)"
+            except subprocess.TimeoutExpired:
+                return f"Search timed out for '{pattern}'"
+
+        if result.returncode == 0:
+            output = result.stdout.strip()
+            if not output:
+                return f"No matches for '{pattern}'" + (f" in {include}" if include else "")
+            lines = output.splitlines()
+            return f"Found {len(lines)} match(es):\n" + "\n".join(lines[:50]) + ("\n..." if len(lines) > 50 else "")
+        elif result.returncode == 1:
+            return f"No matches for '{pattern}'" + (f" in {include}" if include else "")
+        else:
+            return f"Search failed (code {result.returncode}): {result.stderr.strip() or result.stdout.strip()[:200]}"
 
     def glob(self, pattern: str) -> str:
         """List files matching a glob pattern."""
@@ -150,12 +159,16 @@ class OperationToolSet:
             return f"Failed to add label: {e}"
 
     def open_draft_pr(self, title: str, body: str, base: str = "main") -> str:
-        """Open a draft pull request."""
+        """Push the branch, then open a draft pull request."""
         try:
-            client = self._github_client()
             import git
             repo = git.Repo(self.repo_path)
             head = repo.active_branch.name
+            # Auto-push before opening PR (branch must exist on remote)
+            push_result = self.push_branch()
+            if "Failed" in push_result:
+                return f"Push failed before opening PR: {push_result}"
+            client = self._github_client()
             result = client.open_draft_pr(title=title, body=body, head=head, base=base)
             return json.dumps(result)
         except Exception as e:
@@ -175,6 +188,18 @@ class OperationToolSet:
             return f"Created and switched to branch '{branch_name}'"
         except Exception as e:
             return f"Failed to create branch: {e}"
+
+    def push_branch(self) -> str:
+        """Push the current branch to the remote."""
+        try:
+            client = self._git_client()
+            import git
+            repo = git.Repo(self.repo_path)
+            branch = repo.active_branch.name
+            client.push(branch=branch)
+            return f"Pushed branch '{branch}' to origin"
+        except Exception as e:
+            return f"Failed to push: {e}"
 
     def commit_changes(self, message: str) -> str:
         """Stage and commit all local changes."""
@@ -200,4 +225,5 @@ class OperationToolSet:
             "open_draft_pr": self.open_draft_pr,
             "create_branch": self.create_branch,
             "commit_changes": self.commit_changes,
+            "push_branch": self.push_branch,
         }

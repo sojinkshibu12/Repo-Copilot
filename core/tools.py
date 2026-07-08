@@ -114,6 +114,15 @@ TOOL_DEFINITIONS: list[dict] = [
         },
     },
     {
+        "name": "push_branch",
+        "description": "Push the current branch to the remote repository. Must be called after commit_changes and before open_draft_pr.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+        },
+    },
+    {
         "name": "commit_changes",
         "description": "Stage and commit all local changes.",
         "input_schema": {

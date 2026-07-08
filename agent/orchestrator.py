@@ -20,8 +20,8 @@ Your workflow:
    - Then read specific files with `read_file`
    - Use `grep`/`glob` for precise pattern matching
    - Draft a fix and run tests
-   - If tests pass, commit and open a draft PR
-   - If tests fail, comment with your diff and explain the failure
+    - If tests pass, commit_changes → push_branch → open_draft_pr
+    - If tests fail, comment with your diff and explain the failure
 3. If FEATURE / DUPLICATE / UNCLEAR:
    - Comment appropriately (ask clarifying questions, reference duplicates, etc.)
    - Add relevant labels
