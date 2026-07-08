@@ -164,17 +164,19 @@ async def dashboard():
 
 # ── Repo (Branches, Commits, PRs) ────────────────────────────────
 
-import git as gitpy
-
 _repo_instance = None
 
 
 def _get_repo():
     global _repo_instance
     if _repo_instance is None:
-        import git
-        path = os.environ.get("REPO_LOCAL_PATH", ".")
-        _repo_instance = git.Repo(path)
+        try:
+            import git
+            path = os.environ.get("REPO_LOCAL_PATH", ".")
+            _repo_instance = git.Repo(path)
+        except Exception as e:
+            logger.warning("Cannot open git repo: %s", e)
+            return None
     return _repo_instance
 
 
