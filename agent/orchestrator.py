@@ -100,7 +100,8 @@ class Orchestrator:
             "max_iterations": session.max_iterations,
         }) as run_span:
             for iteration in range(session.max_iterations):
-                logger.info("Iteration %d | state=%s", iteration, session.state.value)
+                logger.info("Iteration %d | state=%s | msg_count=%d | issue=#%d",
+                            iteration, session.state.value, len(session.messages), issue.number)
 
                 with tracer.span("orchestrator.llm_call", kind="llm", attributes={
                     "iteration": iteration,
@@ -113,10 +114,19 @@ class Orchestrator:
                     )
                     llm_span.set_attribute("num_tool_calls", len(response.tool_calls))
                     llm_span.set_attribute("iteration", iteration)
+                    llm_span.set_attribute("content_len",
+                                           len(response.content) if response.content else 0)
+                    logger.info("Iteration %d | tool_calls=%d | content_len=%d",
+                                iteration, len(response.tool_calls),
+                                len(response.content) if response.content else 0)
 
                 if response.tool_calls:
+                    logger.info("Iteration %d | executing %d tool call(s): %s",
+                                iteration, len(response.tool_calls),
+                                [tc["name"] for tc in response.tool_calls])
                     self._execute_tool_calls(session, response, iteration)
                 else:
+                    logger.info("Iteration %d | no tool calls — completing", iteration)
                     session.state = AgentState.COMPLETED
                     break
 

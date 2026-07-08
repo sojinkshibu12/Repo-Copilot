@@ -19,7 +19,7 @@ services:
       - key: LLM_PROVIDER
         value: openrouter
       - key: LLM_MODEL
-        value: openrouter/free
+        value: nvidia/nemotron-3-ultra-550b-a55b:free
       - key: EMBEDDING_PROVIDER
         value: google
       - key: LOG_LEVEL
