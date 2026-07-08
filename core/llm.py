@@ -261,6 +261,53 @@ def _openai_tools(tools: list[dict]) -> list[dict]:
     return converted
 
 
+def _openai_convert_messages(messages: list[dict]) -> list[dict]:
+    """Convert Anthropic-format messages (from orchestrator) to OpenAI format.
+
+    Handles:
+      - assistant messages with tool_calls stored in content dict
+      - tool result messages using Anthropic's tool_result block format
+    """
+    converted = []
+    for m in messages:
+        role = m["role"]
+        content = m.get("content", "")
+
+        # Assistant with tool_calls stored as dict content
+        if role == "assistant" and isinstance(content, dict) and "tool_calls" in content:
+            openai_tc = []
+            for tc in content["tool_calls"]:
+                openai_tc.append({
+                    "id": tc["id"],
+                    "function": {
+                        "name": tc["name"],
+                        "arguments": json.dumps(tc["input"]),
+                    },
+                })
+            converted.append({
+                "role": "assistant",
+                "content": content.get("text", "") or "",
+                "tool_calls": openai_tc,
+            })
+            continue
+
+        # Tool result in Anthropic format (list of blocks with type=tool_result)
+        if role == "user" and isinstance(content, list):
+            tool_blocks = [b for b in content if isinstance(b, dict) and b.get("type") == "tool_result"]
+            if tool_blocks:
+                for b in tool_blocks:
+                    converted.append({
+                        "role": "tool",
+                        "tool_call_id": b.get("tool_use_id", ""),
+                        "content": b.get("content", ""),
+                    })
+                continue
+
+        # Pass through as-is
+        converted.append(m)
+    return converted
+
+
 # ---------------------------------------------------------------------------
 # Google Gemini
 # ---------------------------------------------------------------------------
@@ -435,10 +482,12 @@ class _OpenRouterProvider(BaseProvider):
 
         body = dict(model=model, max_tokens=max_tokens, temperature=temperature)
 
+        converted = _openai_convert_messages(messages)
+
         if system:
-            body["messages"] = [{"role": "system", "content": system}] + messages
+            body["messages"] = [{"role": "system", "content": system}] + converted
         else:
-            body["messages"] = messages
+            body["messages"] = converted
 
         if tools:
             body["tools"] = _openai_tools(tools)
@@ -495,10 +544,12 @@ class _DeepSeekProvider(BaseProvider):
 
         body = dict(model=model, max_tokens=max_tokens, temperature=temperature)
 
+        converted = _openai_convert_messages(messages)
+
         if system:
-            body["messages"] = [{"role": "system", "content": system}] + messages
+            body["messages"] = [{"role": "system", "content": system}] + converted
         else:
-            body["messages"] = messages
+            body["messages"] = converted
 
         if tools:
             body["tools"] = _openai_tools(tools)
