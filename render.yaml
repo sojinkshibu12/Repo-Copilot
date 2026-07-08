@@ -19,7 +19,7 @@ services:
       - key: LLM_PROVIDER
         value: openrouter
       - key: LLM_MODEL
-        value: tencent/hy3-preview:free
+        value: openrouter/free
       - key: EMBEDDING_PROVIDER
         value: google
       - key: LOG_LEVEL
