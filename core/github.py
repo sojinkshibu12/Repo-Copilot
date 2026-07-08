@@ -21,7 +21,7 @@ class GitHubClient:
         )
         self._client = self._build_client()
 
-    def _build_client):
+    def _build_client(self):
         if not self.config.token:
             logger.warning("No GITHUB_TOKEN set — using mock client")
             return _MockGitHub()
@@ -90,6 +90,9 @@ class _MockRepo:
 
     def create_pull(self, **kwargs):
         return _MockPR()
+
+    def get_pulls(self, state="open", sort="updated", direction="desc"):
+        return []
 
 
 class _MockGHIssue:

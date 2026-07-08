@@ -20,6 +20,7 @@
     --red: #ef4444;
     --blue: #3b82f6;
     --purple: #a855f7;
+    --orange: #f97316;
     --sidebar-w: 240px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -30,8 +31,6 @@
     min-height: 100vh;
     display: flex;
   }
-
-  /* ── Sidebar ─────────────────────────────────────────── */
   .sidebar {
     width: var(--sidebar-w);
     min-height: 100vh;
@@ -44,76 +43,27 @@
     top: 0;
     z-index: 100;
   }
-  .sidebar-brand {
-    padding: 1.25rem 1.25rem 0.75rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    border-bottom: 1px solid var(--border);
-  }
+  .sidebar-brand { padding: 1.25rem 1.25rem 0.75rem; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border); }
   .sidebar-brand span { color: var(--accent); }
-  .sidebar-nav { flex: 1; padding: 0.75rem 0; }
-  .sidebar-nav a {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.7rem 1.25rem;
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 0.875rem;
-    transition: all 0.15s;
-    border-left: 3px solid transparent;
-  }
+  .sidebar-nav { flex: 1; padding: 0.75rem 0; overflow-y: auto; }
+  .sidebar-nav .nav-label { padding: 0.5rem 1.25rem 0.25rem; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+  .sidebar-nav a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1.25rem; color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: all 0.15s; border-left: 3px solid transparent; }
   .sidebar-nav a:hover { color: var(--text); background: var(--surface-2); }
-  .sidebar-nav a.active {
-    color: var(--accent-hover);
-    background: rgba(99,102,241,0.08);
-    border-left-color: var(--accent);
-  }
+  .sidebar-nav a.active { color: var(--accent-hover); background: rgba(99,102,241,0.08); border-left-color: var(--accent); }
   .sidebar-nav a .icon { width: 20px; text-align: center; font-size: 1rem; }
-  .sidebar-footer {
-    padding: 1rem 1.25rem;
-    border-top: 1px solid var(--border);
-    font-size: 0.7rem;
-    color: var(--text-muted);
-  }
-  .sidebar-footer .status-dot {
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    margin-right: 0.4rem;
-  }
+  .sidebar-footer { padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); font-size: 0.7rem; color: var(--text-muted); }
+  .sidebar-footer .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.4rem; }
   .sidebar-footer .status-dot.online { background: var(--green); }
   .sidebar-footer .status-dot.offline { background: var(--red); }
-
-  /* ── Main Content ────────────────────────────────────── */
-  .main {
-    margin-left: var(--sidebar-w);
-    flex: 1;
-    padding: 0;
-  }
-  .page-header {
-    padding: 1.5rem 2rem 0;
-  }
+  .main { margin-left: var(--sidebar-w); flex: 1; padding: 0; }
+  .page-header { padding: 1.5rem 2rem 0; }
   .page-header h1 { font-size: 1.5rem; font-weight: 700; }
   .page-header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem; }
   .page-content { padding: 1.5rem 2rem 2rem; }
-
-  /* ── Page visibility ─────────────────────────────────── */
   .page { display: none; }
   .page.active { display: block; }
-
-  /* ── Cards ────────────────────────────────────────────── */
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.25rem;
-    transition: border-color 0.2s;
-  }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; transition: border-color 0.2s; }
   .card:hover { border-color: var(--accent); }
   .card .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.4rem; }
   .card .value { font-size: 2rem; font-weight: 700; }
@@ -124,58 +74,17 @@
   .card .value.accent { color: var(--accent); }
   .card .value.blue { color: var(--blue); }
   .card .value.purple { color: var(--purple); }
-
-  /* ── Panels ───────────────────────────────────────────── */
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 1.5rem;
-  }
-  .panel-header {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+  .card .value.orange { color: var(--orange); }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1.5rem; }
+  .panel-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
   .panel-header h2 { font-size: 0.95rem; font-weight: 600; }
-  .panel-header .count {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    background: var(--surface-2);
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
-  }
+  .panel-header .count { font-size: 0.75rem; color: var(--text-muted); background: var(--surface-2); padding: 0.2rem 0.6rem; border-radius: 4px; }
   .panel-body { padding: 1rem 1.25rem; }
-
-  /* ── Tables ───────────────────────────────────────────── */
   table { width: 100%; border-collapse: collapse; }
-  th {
-    text-align: left;
-    padding: 0.75rem 1.25rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border);
-    font-weight: 500;
-  }
-  td {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.875rem;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-  }
+  th { text-align: left; padding: 0.75rem 1.25rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); border-bottom: 1px solid var(--border); font-weight: 500; }
+  td { padding: 0.75rem 1.25rem; font-size: 0.875rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tr:hover td { background: var(--surface-2); }
-  .label-tag {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    text-transform: uppercase;
-  }
+  .label-tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 500; text-transform: uppercase; }
   .label-tag.bug { background: rgba(239,68,68,0.15); color: var(--red); }
   .label-tag.feature { background: rgba(59,130,246,0.15); color: var(--blue); }
   .label-tag.duplicate { background: rgba(168,85,247,0.15); color: var(--purple); }
@@ -183,238 +92,99 @@
   .label-tag.opened_pr { background: rgba(34,197,94,0.15); color: var(--green); }
   .label-tag.commented { background: rgba(99,102,241,0.15); color: var(--accent); }
   .label-tag.no_action { background: rgba(139,143,165,0.15); color: var(--text-muted); }
-
-  /* ── Charts ───────────────────────────────────────────── */
   .chart-container { padding: 1.25rem; }
   .chart-container canvas { max-height: 280px; }
-
-  /* ── Empty state ───────────────────────────────────────── */
-  .empty {
-    text-align: center;
-    padding: 3rem 1.25rem;
-    color: var(--text-muted);
-  }
+  .empty { text-align: center; padding: 3rem 1.25rem; color: var(--text-muted); }
   .empty p { font-size: 0.9rem; margin-bottom: 0.5rem; }
   .empty .hint { font-size: 0.8rem; }
-
-  /* ── Loading ───────────────────────────────────────────── */
-  .loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
-    color: var(--text-muted);
-  }
-  .spinner {
-    width: 20px; height: 20px;
-    border: 2px solid var(--border);
-    border-top: 2px solid var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-right: 0.75rem;
-  }
+  .loading { display: flex; align-items: center; justify-content: center; padding: 3rem; color: var(--text-muted); }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top: 2px solid var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 0.75rem; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
-
-  /* ── Distribution bars ────────────────────────────────── */
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
   .dist-bar { display: flex; align-items: center; gap: 0.5rem; margin: 0.3rem 0; }
   .dist-bar .dist-label { width: 80px; font-size: 0.8rem; color: var(--text-muted); }
   .dist-bar .dist-track { flex: 1; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
   .dist-bar .dist-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
   .dist-bar .dist-count { width: 30px; text-align: right; font-size: 0.8rem; font-weight: 600; }
-
-  /* ── Buttons ───────────────────────────────────────────── */
-  .btn {
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--surface-2);
-    color: var(--text);
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-weight: 500;
-  }
+  .btn { padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); color: var(--text); font-size: 0.8rem; cursor: pointer; transition: all 0.15s; font-weight: 500; }
   .btn:hover { background: var(--border); }
   .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn-primary:hover { background: var(--accent-hover); }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
-  .btn-icon {
-    background: none; border: 1px solid var(--border); border-radius: 4px;
-    cursor: pointer; color: var(--text-muted); font-size: 1rem;
-    width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-  }
+  .btn-link { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.8rem; padding: 0; }
+  .btn-link:hover { text-decoration: underline; color: var(--accent-hover); }
+  .btn-icon { background: none; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: var(--text-muted); font-size: 1rem; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; }
   .btn-icon:hover { background: var(--surface-2); color: var(--accent); border-color: var(--accent); }
   .btn-icon:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  /* ── Toast ─────────────────────────────────────────────── */
-  #toast-container {
-    position: fixed; top: 1rem; right: 1rem; z-index: 999;
-    display: flex; flex-direction: column; gap: 0.5rem;
-  }
-  .toast {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; padding: 0.6rem 1rem;
-    font-size: 0.8rem; color: var(--text);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    animation: slideIn 0.3s ease;
-    max-width: 360px;
-  }
+  #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 999; display: flex; flex-direction: column; gap: 0.5rem; }
+  .toast { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.8rem; color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,0.4); animation: slideIn 0.3s ease; max-width: 360px; }
   .toast.success { border-color: var(--green); }
   .toast.error { border-color: var(--red); }
   @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
-
-  /* ── Search / Filter ───────────────────────────────────── */
-  .search-bar {
-    display: flex; gap: 0.75rem; align-items: center;
-    padding: 0.75rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .search-bar input {
-    flex: 1;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0.5rem 0.75rem;
-    color: var(--text);
-    font-size: 0.85rem;
-    outline: none;
-  }
+  .search-bar { display: flex; gap: 0.75rem; align-items: center; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .search-bar input { flex: 1; min-width: 120px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem 0.75rem; color: var(--text); font-size: 0.85rem; outline: none; }
   .search-bar input:focus { border-color: var(--accent); }
-  .search-bar select {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0.5rem 0.75rem;
-    color: var(--text);
-    font-size: 0.85rem;
-    outline: none;
-  }
-
-  /* ── Logs View ─────────────────────────────────────────── */
-  .log-container {
-    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-    font-size: 0.8rem;
-    line-height: 1.6;
-  }
-  .log-entry {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.35rem 1.25rem;
-    border-bottom: 1px solid rgba(42,46,63,0.4);
-    transition: background 0.1s;
-  }
-  .log-entry:hover { background: rgba(35,39,56,0.5); }
-  .log-entry .log-time {
-    color: var(--text-muted);
-    font-size: 0.7rem;
-    white-space: nowrap;
-    min-width: 75px;
-    padding-top: 0.05rem;
-  }
-  .log-entry .log-level {
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    min-width: 44px;
-    padding: 0.1rem 0.3rem;
-    border-radius: 3px;
-    text-align: center;
-    letter-spacing: 0.04em;
-  }
-  .log-entry .log-level.info { background: rgba(59,130,246,0.12); color: var(--blue); }
-  .log-entry .log-level.warning { background: rgba(234,179,8,0.12); color: var(--yellow); }
-  .log-entry .log-level.error { background: rgba(239,68,68,0.12); color: var(--red); }
-  .log-entry .log-level.debug { background: rgba(139,143,165,0.12); color: var(--text-muted); }
-  .log-entry .log-msg { flex: 1; word-break: break-word; }
-  .log-entry .log-badge {
-    font-size: 0.65rem;
-    padding: 0.1rem 0.35rem;
-    border-radius: 3px;
-    margin-left: 0.35rem;
-    white-space: nowrap;
-  }
-  .log-entry .log-badge.llm { background: rgba(168,85,247,0.12); color: var(--purple); }
-  .log-entry .log-badge.http { background: rgba(99,102,241,0.12); color: var(--accent); }
-  .log-entry .log-badge.agent { background: rgba(34,197,94,0.12); color: var(--green); }
-  .log-entry .log-badge.tool { background: rgba(234,179,8,0.12); color: var(--yellow); }
-
-  .log-controls {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    padding: 0.75rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-  .log-controls select, .log-controls input {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0.4rem 0.6rem;
-    color: var(--text);
-    font-size: 0.8rem;
-    outline: none;
-  }
-  .log-controls select:focus, .log-controls input:focus { border-color: var(--accent); }
-
-  /* ── Settings ──────────────────────────────────────────── */
-  .settings-group { margin-bottom: 1.5rem; }
-  .settings-group h3 {
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .settings-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .settings-row:last-child { border-bottom: none; }
-  .settings-row .label { font-size: 0.85rem; }
-  .settings-row .desc { font-size: 0.75rem; color: var(--text-muted); }
-  .settings-row .value { font-family: monospace; font-size: 0.8rem; color: var(--accent); }
-
-  .footer-info {
-    text-align: center;
-    padding: 1rem;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    border-top: 1px solid var(--border);
-  }
-
+  .search-bar select { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem 0.75rem; color: var(--text); font-size: 0.85rem; outline: none; }
+  .pagination { display: flex; gap: 0.5rem; justify-content: center; align-items: center; padding: 1rem 1.25rem; }
+  .pagination span { font-size: 0.8rem; color: var(--text-muted); }
+  .branch-node { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+  .branch-node:last-child { border-bottom: none; }
+  .branch-node .branch-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+  .branch-node .branch-icon.head { background: rgba(34,197,94,0.15); color: var(--green); }
+  .branch-node .branch-info { flex: 1; min-width: 0; }
+  .branch-node .branch-name { font-weight: 600; font-size: 0.85rem; font-family: monospace; }
+  .branch-node .branch-meta { font-size: 0.75rem; color: var(--text-muted); }
+  .commit-node { padding: 0.6rem 0; border-bottom: 1px solid var(--border); display: flex; gap: 0.75rem; align-items: flex-start; }
+  .commit-node:last-child { border-bottom: none; }
+  .commit-node .commit-icon { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-top: 0.35rem; flex-shrink: 0; }
+  .commit-node .commit-sha { font-family: monospace; font-size: 0.75rem; color: var(--text-muted); min-width: 60px; }
+  .commit-node .commit-msg { flex: 1; font-size: 0.85rem; min-width: 0; }
+  .commit-node .commit-meta { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+  .pr-node { padding: 0.7rem 0; border-bottom: 1px solid var(--border); display: flex; gap: 0.75rem; align-items: center; }
+  .pr-node:last-child { border-bottom: none; }
+  .pr-node .pr-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+  .pr-node .pr-icon.open { background: rgba(34,197,94,0.15); color: var(--green); }
+  .pr-node .pr-icon.closed { background: rgba(239,68,68,0.15); color: var(--red); }
+  .pr-node .pr-icon.merged { background: rgba(168,85,247,0.15); color: var(--purple); }
+  .pr-node .pr-info { flex: 1; min-width: 0; }
+  .pr-node .pr-title { font-size: 0.85rem; font-weight: 500; }
+  .pr-node .pr-meta { font-size: 0.75rem; color: var(--text-muted); }
+  .pr-node .pr-status { font-size: 0.7rem; }
+  .repo-tree { padding: 0.5rem 0; }
+  .repo-tree .tree-section { margin-bottom: 0.5rem; }
+  .repo-tree .tree-section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 0.5rem 0; border-bottom: 1px solid var(--border); margin-bottom: 0.5rem; }
+  .footer-info { text-align: center; padding: 1rem; font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid var(--border); }
+  .show-more { text-align: center; padding: 0.75rem; border-top: 1px solid var(--border); }
   @media (max-width: 768px) {
     body { flex-direction: column; }
     .sidebar { width: 100%; min-height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 0.5rem 1rem; }
     .sidebar-brand { border-bottom: none; padding: 0.25rem 0.5rem; }
     .sidebar-nav { display: flex; gap: 0.25rem; padding: 0.25rem 0; }
     .sidebar-nav a { padding: 0.4rem 0.75rem; border-left: none; border-radius: 6px; }
-    .sidebar-nav a.active { border-left-color: transparent; }
+    .sidebar-nav .nav-label { display: none; }
     .sidebar-footer { display: none; }
     .main { margin-left: 0; }
-    .grid-2 { grid-template-columns: 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .page-content { padding: 1rem; }
   }
 </style>
 </head>
 <body>
 
-<!-- ── Sidebar ──────────────────────────────────────────── -->
 <nav class="sidebar">
   <div class="sidebar-brand"><span>&#9670;</span> Repo Copilot</div>
   <div class="sidebar-nav">
+    <div class="nav-label">Main</div>
     <a href="#" data-page="dashboard" class="active"><span class="icon">&#9632;</span> Dashboard</a>
     <a href="#" data-page="issues"><span class="icon">&#9881;</span> Issues</a>
     <a href="#" data-page="logs"><span class="icon">&#9776;</span> Logs</a>
+    <div class="nav-label">Repository</div>
+    <a href="#" data-page="repository"><span class="icon">&#9641;</span> Repository</a>
+    <a href="#" data-page="activity"><span class="icon">&#8635;</span> Activity</a>
+    <a href="#" data-page="commits-prs"><span class="icon">&#8618;</span> Commits & PRs</a>
+    <div class="nav-label">System</div>
     <a href="#" data-page="evaluations"><span class="icon">&#10003;</span> Evaluations</a>
     <a href="#" data-page="settings"><span class="icon">&#9881;</span> Settings</a>
   </div>
@@ -424,17 +194,12 @@
   </div>
 </nav>
 
-<!-- ── Main ─────────────────────────────────────────────── -->
 <div class="main">
 
   <!-- ==================== DASHBOARD ==================== -->
   <div class="page active" id="page-dashboard">
-    <div class="page-header">
-      <h1>Dashboard</h1>
-      <p>Overview of issues, decisions, and evaluation scores</p>
-    </div>
+    <div class="page-header"><h1>Dashboard</h1><p>Overview of issues, decisions, and evaluation scores</p></div>
     <div class="page-content">
-
       <div class="cards" id="stats-cards">
         <div class="card"><div class="label">Issues Processed</div><div class="value accent" id="stat-issues">—</div></div>
         <div class="card"><div class="label">Decisions Made</div><div class="value blue" id="stat-decisions">—</div></div>
@@ -442,7 +207,6 @@
         <div class="card"><div class="label">Latest Eval Score</div><div class="value purple" id="stat-eval">—</div></div>
         <div class="card"><div class="label">Uptime</div><div class="value accent" id="stat-uptime">—</div><div class="sub">hours</div></div>
       </div>
-
       <div class="grid-2">
         <div>
           <div class="panel">
@@ -450,9 +214,7 @@
             <div class="chart-container"><canvas id="eval-chart"></canvas></div>
           </div>
           <div class="panel">
-            <div class="panel-header">
-              <h2>Classification Distribution</h2>
-            </div>
+            <div class="panel-header"><h2>Classification Distribution</h2></div>
             <div class="panel-body" id="classification-dist"></div>
           </div>
         </div>
@@ -463,22 +225,17 @@
           </div>
           <div class="panel">
             <div class="panel-header"><h2>Recent Activity</h2></div>
-            <div class="panel-body" id="recent-activity">
-              <div class="loading"><div class="spinner"></div> Loading...</div>
-            </div>
+            <div class="panel-body" id="recent-activity"><div class="loading"><div class="spinner"></div> Loading...</div></div>
+            <div class="show-more"><button class="btn-link" onclick="navigate('activity')">Show More &rarr;</button></div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
   <!-- ==================== ISSUES ==================== -->
   <div class="page" id="page-issues">
-    <div class="page-header">
-      <h1>Issues</h1>
-      <p>All processed GitHub issues with agent decisions</p>
-    </div>
+    <div class="page-header"><h1>Issues</h1><p>All processed GitHub issues with agent decisions</p></div>
     <div class="page-content">
       <div class="panel">
         <div class="search-bar">
@@ -490,24 +247,19 @@
             <option value="duplicate">Duplicate</option>
             <option value="unclear">Unclear</option>
           </select>
-          <button class="btn btn-primary btn-sm" onclick="loadIssues()">Refresh</button>
+          <button class="btn btn-sm btn-primary" onclick="loadIssues()">Refresh</button>
         </div>
-        <div id="issues-table">
-          <div class="loading"><div class="spinner"></div> Loading issues...</div>
-        </div>
+        <div id="issues-table"><div class="loading"><div class="spinner"></div> Loading issues...</div></div>
       </div>
     </div>
   </div>
 
   <!-- ==================== LOGS ==================== -->
   <div class="page" id="page-logs">
-    <div class="page-header">
-      <h1>Logs</h1>
-      <p>Real-time structured log stream</p>
-    </div>
+    <div class="page-header"><h1>Logs</h1><p>Real-time structured log stream</p></div>
     <div class="page-content">
       <div class="panel">
-        <div class="log-controls">
+        <div class="search-bar">
           <select id="log-level-filter" onchange="filterLogs()">
             <option value="all">All Levels</option>
             <option value="info">INFO</option>
@@ -521,8 +273,84 @@
           <button class="btn btn-sm btn-primary" id="log-auto-scroll-btn" onclick="toggleAutoScroll()">Auto-scroll ON</button>
           <button class="btn btn-sm" onclick="clearLogs()">Clear</button>
         </div>
-        <div id="log-container" class="log-container" style="max-height:65vh;overflow-y:auto">
-          <div class="loading"><div class="spinner"></div> Loading logs...</div>
+        <div id="log-container" class="log-container" style="max-height:65vh;overflow-y:auto"><div class="loading"><div class="spinner"></div> Loading logs...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== REPOSITORY ==================== -->
+  <div class="page" id="page-repository">
+    <div class="page-header"><h1>Repository</h1><p>Branches, commits, and pull requests at a glance</p></div>
+    <div class="page-content">
+      <div class="grid-3">
+        <div class="panel">
+          <div class="panel-header"><h2>Branches</h2><span class="count" id="branch-count">0</span></div>
+          <div class="panel-body"><div id="branch-tree" class="repo-tree"><div class="loading"><div class="spinner"></div></div></div></div>
+          <div class="show-more"><button class="btn-link" onclick="navigate('commits-prs')">Show More &rarr;</button></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h2>Commits</h2><span class="count" id="commit-count">0</span></div>
+          <div class="panel-body"><div id="commit-preview" class="repo-tree"><div class="loading"><div class="spinner"></div></div></div></div>
+          <div class="show-more"><button class="btn-link" onclick="navigate('commits-prs')">Show More &rarr;</button></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><h2>Pull Requests</h2><span class="count" id="pr-count">0</span></div>
+          <div class="panel-body"><div id="pr-preview" class="repo-tree"><div class="loading"><div class="spinner"></div></div></div></div>
+          <div class="show-more"><button class="btn-link" onclick="navigate('commits-prs')">Show More &rarr;</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ACTIVITY ==================== -->
+  <div class="page" id="page-activity">
+    <div class="page-header"><h1>Activity</h1><p>All processed issues — full history with pagination</p></div>
+    <div class="page-content">
+      <div class="panel">
+        <div class="search-bar">
+          <input type="text" id="activity-search" placeholder="Search activity..." oninput="filterActivity()">
+          <button class="btn btn-sm" onclick="loadActivity()">Refresh</button>
+        </div>
+        <div id="activity-table"><div class="loading"><div class="spinner"></div> Loading...</div></div>
+        <div class="pagination" id="activity-pagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== COMMITS & PRs ==================== -->
+  <div class="page" id="page-commits-prs">
+    <div class="page-header"><h1>Commits & PRs</h1><p>Full commit history and pull request list with pagination</p></div>
+    <div class="page-content">
+      <div class="grid-2">
+        <div>
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Commits</h2>
+              <div style="display:flex;gap:0.5rem;align-items:center">
+                <select id="commit-branch-filter" onchange="loadCommits()" style="background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:0.2rem 0.4rem;color:var(--text);font-size:0.75rem;outline:none"></select>
+                <span class="count" id="commit-count-2">0</span>
+              </div>
+            </div>
+            <div id="commits-full"><div class="loading"><div class="spinner"></div></div></div>
+            <div class="pagination" id="commits-pagination"></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Pull Requests</h2>
+              <div style="display:flex;gap:0.5rem;align-items:center">
+                <select id="pr-state-filter" onchange="loadPRs()" style="background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:0.2rem 0.4rem;color:var(--text);font-size:0.75rem;outline:none">
+                  <option value="open">Open</option>
+                  <option value="closed">Closed</option>
+                  <option value="all">All</option>
+                </select>
+                <span class="count" id="pr-count-2">0</span>
+              </div>
+            </div>
+            <div id="prs-full"><div class="loading"><div class="spinner"></div></div></div>
+            <div class="pagination" id="prs-pagination"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -530,70 +358,48 @@
 
   <!-- ==================== EVALUATIONS ==================== -->
   <div class="page" id="page-evaluations">
-    <div class="page-header">
-      <h1>Evaluations</h1>
-      <p>Automated evaluation runs and accuracy metrics</p>
-    </div>
+    <div class="page-header"><h1>Evaluations</h1><p>Automated evaluation runs and accuracy metrics</p></div>
     <div class="page-content">
       <div style="margin-bottom:1rem;display:flex;gap:0.75rem;align-items:center">
         <button class="btn btn-primary" onclick="runEval()">Run Evaluation Suite</button>
         <span id="eval-running" style="display:none;font-size:0.8rem;color:var(--text-muted)">Running...</span>
       </div>
       <div id="eval-result" style="margin-bottom:1.5rem;"></div>
-
       <div class="panel">
         <div class="panel-header"><h2>Eval Score History</h2><span class="count" id="eval-count-2">0 runs</span></div>
         <div class="chart-container"><canvas id="eval-chart-2"></canvas></div>
       </div>
-
       <div class="panel">
         <div class="panel-header"><h2>Eval Runs</h2></div>
-        <div id="eval-runs-table">
-          <div class="loading"><div class="spinner"></div> Loading...</div>
-        </div>
+        <div id="eval-runs-table"><div class="loading"><div class="spinner"></div></div></div>
       </div>
     </div>
   </div>
 
   <!-- ==================== SETTINGS ==================== -->
   <div class="page" id="page-settings">
-    <div class="page-header">
-      <h1>Settings</h1>
-      <p>System configuration and environment</p>
-    </div>
+    <div class="page-header"><h1>Settings</h1><p>System configuration and environment</p></div>
     <div class="page-content">
-      <div class="panel">
-        <div class="panel-header"><h2>LLM Configuration</h2></div>
-        <div class="panel-body" id="settings-llm">
-          <div class="loading"><div class="spinner"></div></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><h2>System</h2></div>
-        <div class="panel-body" id="settings-system">
-          <div class="loading"><div class="spinner"></div></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><h2>Tools</h2></div>
-        <div class="panel-body" id="settings-tools">
-          <div class="loading"><div class="spinner"></div></div>
-        </div>
-      </div>
+      <div class="panel"><div class="panel-header"><h2>LLM Configuration</h2></div><div class="panel-body" id="settings-llm"><div class="loading"><div class="spinner"></div></div></div></div>
+      <div class="panel"><div class="panel-header"><h2>System</h2></div><div class="panel-body" id="settings-system"><div class="loading"><div class="spinner"></div></div></div></div>
+      <div class="panel"><div class="panel-header"><h2>Tools</h2></div><div class="panel-body" id="settings-tools"><div class="loading"><div class="spinner"></div></div></div></div>
     </div>
   </div>
 
-  <div class="footer-info">
-    Repo Copilot &middot; v0.1.0
-  </div>
+  <div class="footer-info">Repo Copilot &middot; v0.1.0</div>
 </div>
 
 <div id="toast-container"></div>
 
 <script>
 const API = "";
+let _issuesData = [];
+let _logsData = [];
+let _autoScroll = true;
+let _activityPage = 1;
+let _commitsPage = 1;
+let _prsPage = 1;
 
-// ── Routing ───────────────────────────────────────────────────────
 function navigate(page) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".sidebar-nav a").forEach(a => a.classList.remove("active"));
@@ -601,72 +407,50 @@ function navigate(page) {
   if (target) target.classList.add("active");
   const link = document.querySelector(`.sidebar-nav a[data-page="${page}"]`);
   if (link) link.classList.add("active");
+  // lazy load
+  const loads = {
+    issues: () => loadIssues(),
+    logs: () => loadLogs(),
+    repository: () => loadRepository(),
+    activity: () => loadActivity(),
+    "commits-prs": () => { loadCommits(); loadPRs(); },
+    evaluations: () => { loadEvalRuns(); loadEvalRuns2(); },
+    settings: () => loadSettings(),
+    dashboard: () => { loadStats(); loadIssuesSummary(); loadEvalRuns(); },
+  };
+  if (loads[page]) loads[page]();
 }
-
 document.querySelectorAll(".sidebar-nav a").forEach(a => {
-  a.addEventListener("click", e => {
-    e.preventDefault();
-    const page = a.dataset.page;
-    navigate(page);
-    // lazy load
-    if (page === "issues") loadIssues();
-    if (page === "logs") loadLogs();
-    if (page === "evaluations") { loadEvalRuns(); loadEvalRuns2(); }
-    if (page === "settings") loadSettings();
-    if (page === "dashboard") { loadStats(); loadIssuesSummary(); loadEvalRuns(); }
-  });
+  a.addEventListener("click", e => { e.preventDefault(); navigate(a.dataset.page); });
 });
 
-// ── API Helper ─────────────────────────────────────────────────────
 async function api(path, opts) {
   const r = await fetch(API + path, opts || {});
   if (!r.ok) throw new Error(r.status + " " + (await r.text()).slice(0, 80));
   return r.json();
 }
 
-// ── Utils ─────────────────────────────────────────────────────────
-function tag(text, cls) {
-  return `<span class="label-tag ${cls}">${text}</span>`;
-}
-
-function fmtDate(d) {
-  if (!d) return "\u2014";
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-}
-
-function fmtDateTime(d) {
-  if (!d) return "\u2014";
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
-}
-
-function escHtml(s) {
-  const d = document.createElement("div");
-  d.textContent = s || "";
-  return d.innerHTML;
-}
-
+function tag(text, cls) { return `<span class="label-tag ${cls}">${text}</span>`; }
+function fmtDate(d) { if (!d) return "\u2014"; return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); }
+function fmtDateTime(d) { if (!d) return "\u2014"; return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }); }
+function escHtml(s) { const d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
 function toast(msg, type) {
-  const el = document.createElement("div");
-  el.className = "toast" + (type ? " " + type : "");
-  el.textContent = msg;
+  const el = document.createElement("div"); el.className = "toast" + (type ? " " + type : ""); el.textContent = msg;
   document.getElementById("toast-container").appendChild(el);
   setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity 0.3s"; setTimeout(() => el.remove(), 300); }, 3000);
 }
 
-// ── Health / Sidebar Status ────────────────────────────────────────
+// ── Health ────────────────────────────────────────────────
 async function loadHealth() {
   try {
     const h = await api("/health");
-    const dot = document.getElementById("status-dot");
-    const text = document.getElementById("status-text");
-    const detail = document.getElementById("status-detail");
-    dot.className = "status-dot online";
-    text.textContent = "Online";
+    document.getElementById("status-dot").className = "status-dot online";
+    document.getElementById("status-text").textContent = "Online";
     let info = [];
     if (h.llm_provider) info.push(h.llm_provider);
     if (h.llm_model) info.push(h.llm_model.includes("/") ? h.llm_model.split("/").pop() : h.llm_model);
     if (h.tools_registered > 0) info.push(h.tools_registered + " tools");
-    detail.textContent = info.join(" \u00b7 ");
+    document.getElementById("status-detail").textContent = info.join(" \u00b7 ");
     return h;
   } catch (e) {
     document.getElementById("status-dot").className = "status-dot offline";
@@ -676,7 +460,7 @@ async function loadHealth() {
   }
 }
 
-// ── Stats (Dashboard) ─────────────────────────────────────────────
+// ── Stats (Dashboard) ─────────────────────────────────────
 async function loadStats() {
   try {
     const s = await api("/api/stats");
@@ -684,19 +468,10 @@ async function loadStats() {
     document.getElementById("stat-decisions").textContent = s.total_decisions ?? 0;
     document.getElementById("stat-prs").textContent = s.prs_opened ?? 0;
     const evalEl = document.getElementById("stat-eval");
-    if (s.latest_eval_score != null) {
-      evalEl.textContent = (s.latest_eval_score * 100).toFixed(0) + "%";
-    } else {
-      evalEl.textContent = "\u2014";
-    }
-    // uptime from health
-    const h = await api("/health");
-    const hrs = (h.uptime_seconds / 3600).toFixed(1);
-    document.getElementById("stat-uptime").textContent = hrs;
+    evalEl.textContent = s.latest_eval_score != null ? (s.latest_eval_score * 100).toFixed(0) + "%" : "\u2014";
+    const h = await api("/health"); document.getElementById("stat-uptime").textContent = (h.uptime_seconds / 3600).toFixed(1);
     drawDistributions(s);
-  } catch (e) {
-    document.querySelectorAll(".card .value").forEach(el => el.textContent = "err");
-  }
+  } catch (e) { document.querySelectorAll(".card .value").forEach(el => el.textContent = "err"); }
 }
 
 function drawDistributions(s) {
@@ -705,189 +480,227 @@ function drawDistributions(s) {
   const clsMax = Math.max(...Object.values(cls), 1);
   let clsHtml = "";
   for (const [k, v] of Object.entries(cls).sort((a, b) => b[1] - a[1])) {
-    const pct = (v / clsMax * 100).toFixed(0);
-    clsHtml += `<div class="dist-bar"><span class="dist-label">${k}</span><div class="dist-track"><div class="dist-fill" style="width:${pct}%;background:${clsColors[k]||'#6366f1'}"></div></div><span class="dist-count">${v}</span></div>`;
+    clsHtml += `<div class="dist-bar"><span class="dist-label">${k}</span><div class="dist-track"><div class="dist-fill" style="width:${(v/clsMax*100).toFixed(0)}%;background:${clsColors[k]||'#6366f1'}"></div></div><span class="dist-count">${v}</span></div>`;
   }
   document.getElementById("classification-dist").innerHTML = clsHtml || '<div class="empty"><p>No data</p></div>';
-
   const actColors = { opened_pr: "#22c55e", commented: "#6366f1", labeled: "#3b82f6", no_action: "#8b8fa5" };
   const act = s.action_distribution || {};
   const actMax = Math.max(...Object.values(act), 1);
   let actHtml = "";
   for (const [k, v] of Object.entries(act).sort((a, b) => b[1] - a[1])) {
-    const pct = (v / actMax * 100).toFixed(0);
-    actHtml += `<div class="dist-bar"><span class="dist-label">${k.replace("_", " ")}</span><div class="dist-track"><div class="dist-fill" style="width:${pct}%;background:${actColors[k]||'#6366f1'}"></div></div><span class="dist-count">${v}</span></div>`;
+    actHtml += `<div class="dist-bar"><span class="dist-label">${k.replace("_", " ")}</span><div class="dist-track"><div class="dist-fill" style="width:${(v/actMax*100).toFixed(0)}%;background:${actColors[k]||'#6366f1'}"></div></div><span class="dist-count">${v}</span></div>`;
   }
   document.getElementById("action-dist").innerHTML = actHtml || '<div class="empty"><p>No data</p></div>';
 }
 
-// ── Issues Summary (Dashboard recent activity) ────────────────────
+// ── Dashboard Recent Activity ─────────────────────────────
 async function loadIssuesSummary() {
   try {
     const data = await api("/api/issues?per_page=5");
     const items = data.items || [];
-    if (items.length === 0) {
-      document.getElementById("recent-activity").innerHTML = '<div class="empty"><p>No issues yet</p></div>';
-      return;
-    }
-    let html = items.map(iss => {
+    if (items.length === 0) { document.getElementById("recent-activity").innerHTML = '<div class="empty"><p>No issues yet</p></div>'; return; }
+    document.getElementById("recent-activity").innerHTML = items.map(iss => {
       const cls = iss.classification || "unclear";
-      const act = iss.action_taken || "no_action";
-      return `<div class="dist-bar" style="margin:0.35rem 0">
-        <span class="dist-label" style="width:auto;min-width:50px">${tag(cls, cls)}</span>
-        <span style="flex:1;font-size:0.8rem">${escHtml(iss.title).slice(0, 45)}</span>
-        <span style="font-size:0.7rem;color:var(--text-muted)">${fmtDate(iss.decision_created_at)}</span>
-      </div>`;
+      return `<div class="dist-bar" style="margin:0.35rem 0"><span class="dist-label" style="width:auto;min-width:50px">${tag(cls, cls)}</span><span style="flex:1;font-size:0.8rem">${escHtml(iss.title).slice(0, 45)}</span><span style="font-size:0.7rem;color:var(--text-muted)">${fmtDate(iss.decision_created_at)}</span></div>`;
     }).join("");
-    document.getElementById("recent-activity").innerHTML = html;
-  } catch (e) {
-    document.getElementById("recent-activity").innerHTML = '<div class="empty"><p>Failed to load</p></div>';
-  }
+  } catch (e) { document.getElementById("recent-activity").innerHTML = '<div class="empty"><p>Failed to load</p></div>'; }
 }
 
-// ── Issues Table (Issues page) ────────────────────────────────────
+// ── Issues Table ─────────────────────────────────────────
 async function loadIssues() {
-  try {
-    const data = await api("/api/issues?per_page=50");
-    window._issuesData = data.items || [];
-    filterIssues();
-  } catch (e) {
-    document.getElementById("issues-table").innerHTML = `<div class="empty"><p>Failed to load issues</p><div class="hint">${e.message}</div></div>`;
-  }
+  try { const data = await api("/api/issues?per_page=50"); _issuesData = data.items || []; filterIssues(); }
+  catch (e) { document.getElementById("issues-table").innerHTML = `<div class="empty"><p>Failed to load issues</p><div class="hint">${e.message}</div></div>`; }
 }
-
 function filterIssues() {
   const q = (document.getElementById("issues-search").value || "").toLowerCase();
   const clsFilter = document.getElementById("issues-filter").value;
-  let items = window._issuesData || [];
-  if (clsFilter !== "all") items = items.filter(i => (i.classification || "").toLowerCase() === clsFilter);
-  if (q) items = items.filter(i => (i.title || "").toLowerCase().includes(q) || (i.body || "").toLowerCase().includes(q));
-  if (items.length === 0) {
-    document.getElementById("issues-table").innerHTML = '<div class="empty"><p>No matching issues</p></div>';
-    return;
-  }
+  let items = _issuesData.filter(i => (clsFilter === "all" || (i.classification||"").toLowerCase() === clsFilter) && (!q || (i.title||"").toLowerCase().includes(q) || (i.body||"").toLowerCase().includes(q)));
+  if (items.length === 0) { document.getElementById("issues-table").innerHTML = '<div class="empty"><p>No matching issues</p></div>'; return; }
   let html = `<table><thead><tr><th>Issue</th><th>Classification</th><th>Action</th><th>PR</th><th>Time</th><th></th></tr></thead><tbody>`;
   for (const iss of items) {
-    const cls = iss.classification || "unclear";
-    const act = iss.action_taken || "no_action";
-    const actLabel = act.replace(/_/g, " ");
-    const clsTitle = iss.explanation ? ` title="${escHtml(iss.explanation).slice(0, 200)}"` : "";
+    const cls = iss.classification || "unclear"; const act = iss.action_taken || "no_action";
     const prLink = iss.pr_url ? `<a href="${iss.pr_url}" target="_blank">#${iss.pr_url.split("/").pop()}</a>` : "\u2014";
-    const isMock = iss.explanation && iss.explanation.includes("Mock") ? " (mock)" : "";
-    html += `<tr>
-      <td><a href="${iss.url || "#"}" target="_blank" title="${escHtml(iss.body || "").slice(0, 120)}">${escHtml(iss.title).slice(0, 60)}</a>${isMock}<br><span style="font-size:0.75rem;color:var(--text-muted)">#${iss.number} \u00b7 ${iss.repo}</span></td>
-      <td><span class="label-tag ${cls}"${clsTitle}>${cls}</span></td>
-      <td>${tag(actLabel, act)}</td>
-      <td>${prLink}</td>
-      <td style="font-size:0.8rem;color:var(--text-muted)">${fmtDate(iss.decision_created_at || iss.created_at)}</td>
-      <td><button class="btn-icon" data-id="${iss.id}" onclick="reprocessIssue(${iss.id})" title="Run agent again">\u21bb</button></td>
-    </tr>`;
+    html += `<tr><td><a href="${iss.url||"#"}" target="_blank">${escHtml(iss.title).slice(0,60)}</a><br><span style="font-size:0.75rem;color:var(--text-muted)">#${iss.number} \u00b7 ${iss.repo}</span></td>
+      <td>${tag(cls, cls)}</td><td>${tag(act.replace(/_/g," "), act)}</td><td>${prLink}</td>
+      <td style="font-size:0.8rem;color:var(--text-muted)">${fmtDate(iss.decision_created_at||iss.created_at)}</td>
+      <td><button class="btn-icon" data-id="${iss.id}" onclick="reprocessIssue(${iss.id})">\u21bb</button></td></tr>`;
   }
-  html += "</tbody></table>";
-  document.getElementById("issues-table").innerHTML = html;
+  document.getElementById("issues-table").innerHTML = html + "</tbody></table>";
 }
-
 async function reprocessIssue(id) {
   const btn = document.querySelector(`.btn-icon[data-id="${id}"]`);
-  btn.disabled = true;
-  btn.textContent = "\u27f3";
-  try {
-    const result = await api(`/api/issues/${id}/reprocess`, { method: "POST" });
-    toast("Reprocessed issue #" + id, "success");
-    loadIssues();
-  } catch (e) {
-    btn.textContent = "\u2717";
-    toast("Reprocess failed: " + e.message, "error");
-    setTimeout(() => { btn.disabled = false; btn.textContent = "\u21bb"; }, 2000);
-  }
+  btn.disabled = true; btn.textContent = "\u27f3";
+  try { await api(`/api/issues/${id}/reprocess`, { method: "POST" }); toast("Reprocessed #" + id, "success"); loadIssues(); }
+  catch (e) { btn.textContent = "\u2717"; toast("Failed: " + e.message, "error"); setTimeout(() => { btn.disabled = false; btn.textContent = "\u21bb"; }, 2000); }
 }
 
-// ── Logs (Logs page) ─────────────────────────────────────────────
-let _logsData = [];
-let _autoScroll = true;
+// ── Activity page (full paginated) ─────────────────────────
+let _activityData = [];
+async function loadActivity(page) {
+  _activityPage = page || 1;
+  try {
+    const data = await api(`/api/issues?per_page=15&page=${_activityPage}`);
+    _activityData = data.items || [];
+    filterActivity();
+    renderActivityPagination(data);
+  } catch (e) { document.getElementById("activity-table").innerHTML = `<div class="empty"><p>Failed to load</p></div>`; }
+}
+function filterActivity() {
+  const q = (document.getElementById("activity-search").value || "").toLowerCase();
+  let items = _activityData;
+  if (q) items = items.filter(i => (i.title||"").toLowerCase().includes(q) || (i.body||"").toLowerCase().includes(q));
+  if (items.length === 0) { document.getElementById("activity-table").innerHTML = '<div class="empty"><p>No activity</p></div>'; return; }
+  let html = `<table><thead><tr><th>Issue</th><th>Classification</th><th>Action</th><th>PR</th><th>Time</th><th></th></tr></thead><tbody>`;
+  for (const iss of items) {
+    const cls = iss.classification || "unclear"; const act = iss.action_taken || "no_action";
+    html += `<tr><td><a href="${iss.url||"#"}" target="_blank">${escHtml(iss.title).slice(0,60)}</a><br><span style="font-size:0.75rem;color:var(--text-muted)">#${iss.number}</span></td>
+      <td>${tag(cls, cls)}</td><td>${tag(act.replace(/_/g," "), act)}</td>
+      <td>${iss.pr_url ? `<a href="${iss.pr_url}" target="_blank">#${iss.pr_url.split("/").pop()}</a>` : "\u2014"}</td>
+      <td style="font-size:0.8rem;color:var(--text-muted)">${fmtDate(iss.decision_created_at||iss.created_at)}</td>
+      <td><button class="btn-icon" data-id="${iss.id}" onclick="reprocessIssue(${iss.id})">\u21bb</button></td></tr>`;
+  }
+  document.getElementById("activity-table").innerHTML = html + "</tbody></table>";
+}
+function renderActivityPagination(data) {
+  const total = data.total || 0;
+  const pages = data.pages || 1;
+  let html = `<button class="btn btn-sm" onclick="loadActivity(${_activityPage - 1})" ${_activityPage <= 1 ? 'disabled' : ''}>&larr; Prev</button>
+    <span>Page ${_activityPage} of ${pages} (${total} total)</span>
+    <button class="btn btn-sm" onclick="loadActivity(${_activityPage + 1})" ${_activityPage >= pages ? 'disabled' : ''}>Next &rarr;</button>`;
+  document.getElementById("activity-pagination").innerHTML = html;
+}
 
+// ── Logs ──────────────────────────────────────────────────
 async function loadLogs() {
-  try {
-    const logs = await api("/api/logs?limit=500");
-    _logsData = logs;
-    filterLogs();
-    if (_autoScroll) {
-      const container = document.querySelector("#log-container-inner") || document.getElementById("log-container-inner");
-      if (container) container.scrollTop = container.scrollHeight;
-    }
-  } catch (e) {
-    document.querySelector(".log-container").innerHTML = `<div class="empty"><p>Failed to load logs</p><div class="hint">${e.message}</div></div>`;
-  }
+  try { _logsData = await api("/api/logs?limit=500"); filterLogs(); }
+  catch (e) { document.querySelector(".log-container").innerHTML = `<div class="empty"><p>Failed to load logs</p></div>`; }
 }
-
 function filterLogs() {
   const level = document.getElementById("log-level-filter").value;
   const q = (document.getElementById("log-search").value || "").toLowerCase();
   let filtered = _logsData;
-  if (level !== "all") filtered = filtered.filter(l => (l.level || "").toLowerCase() === level);
-  if (q) filtered = filtered.filter(l => (l.message || "").toLowerCase().includes(q));
-
+  if (level !== "all") filtered = filtered.filter(l => (l.level||"").toLowerCase() === level);
+  if (q) filtered = filtered.filter(l => (l.message||"").toLowerCase().includes(q));
   document.getElementById("log-count").textContent = filtered.length + " entries";
-
-  if (filtered.length === 0) {
-    document.querySelector(".log-container").innerHTML = '<div class="empty"><p>No log entries</p></div>';
-    return;
-  }
-
+  if (filtered.length === 0) { document.querySelector(".log-container").innerHTML = '<div class="empty"><p>No entries</p></div>'; return; }
   let html = `<div id="log-container-inner">`;
   for (const entry of filtered) {
-    const level = (entry.level || "info").toLowerCase();
-    const time = entry.time || entry.timestamp || "";
-    const msg = entry.message || "";
-    const badge = entry.badge || "";
-    const badgeHtml = badge ? `<span class="log-badge ${badge}">${badge}</span>` : "";
-    html += `<div class="log-entry">
-      <span class="log-time">${fmtDateTime(time)}</span>
-      <span class="log-level ${level}">${level}</span>
-      <span class="log-msg">${escHtml(msg)} ${badgeHtml}</span>
-    </div>`;
+    const lvl = (entry.level||"info").toLowerCase();
+    const badge = entry.badge||"";
+    html += `<div class="log-entry"><span class="log-time">${fmtDateTime(entry.time)}</span><span class="log-level ${lvl}">${lvl}</span><span class="log-msg">${escHtml(entry.message)}${badge ? ` <span class="log-badge ${badge}">${badge}</span>` : ''}</span></div>`;
   }
-  html += "</div>";
-  document.querySelector(".log-container").innerHTML = html;
-
-  if (_autoScroll) {
-    const container = document.querySelector("#log-container-inner");
-    if (container) container.scrollTop = container.scrollHeight;
-  }
+  document.querySelector(".log-container").innerHTML = html + "</div>";
+  if (_autoScroll) { const c = document.querySelector("#log-container-inner"); if (c) c.parentElement.scrollTop = c.scrollHeight; }
 }
-
 function toggleAutoScroll() {
   _autoScroll = !_autoScroll;
   const btn = document.getElementById("log-auto-scroll-btn");
   btn.textContent = _autoScroll ? "Auto-scroll ON" : "Auto-scroll OFF";
   btn.className = _autoScroll ? "btn btn-sm btn-primary" : "btn btn-sm";
 }
+function clearLogs() { _logsData = []; document.querySelector(".log-container").innerHTML = '<div class="empty"><p>Logs cleared</p></div>'; }
 
-function clearLogs() {
-  _logsData = [];
-  document.querySelector(".log-container").innerHTML = '<div class="empty"><p>Logs cleared</p></div>';
+// ── Repository Page ───────────────────────────────────────
+async function loadRepository() {
+  try {
+    const [branches, commitsData, prsData] = await Promise.all([
+      api("/api/repo/branches"),
+      api("/api/repo/commits?per_page=5"),
+      api("/api/repo/pulls?state=open&per_page=5"),
+    ]);
+    document.getElementById("branch-count").textContent = branches.length;
+    document.getElementById("commit-count").textContent = commitsData.total || 0;
+    document.getElementById("pr-count").textContent = (prsData.items||[]).length;
+
+    // Branches tree
+    if (branches.length === 0) { document.getElementById("branch-tree").innerHTML = '<div class="empty"><p>No branches</p></div>'; }
+    else {
+      document.getElementById("branch-tree").innerHTML = branches.map(b => `<div class="branch-node">
+        <div class="branch-icon ${b.is_head ? 'head' : ''}">${b.is_head ? '\u2713' : '\u2442'}</div>
+        <div class="branch-info"><div class="branch-name">${escHtml(b.name)}${b.is_head ? ' <span style="font-size:0.65rem;color:var(--green)">HEAD</span>' : ''}</div>
+        <div class="branch-meta">${escHtml(b.commit_sha)} &middot; ${escHtml(b.commit_message).slice(0,40)}</div></div>
+      </div>`).join("");
+    }
+
+    // Commits preview
+    const commits = commitsData.items || [];
+    if (commits.length === 0) { document.getElementById("commit-preview").innerHTML = '<div class="empty"><p>No commits</p></div>'; }
+    else {
+      document.getElementById("commit-preview").innerHTML = commits.map(c => `<div class="commit-node">
+        <div class="commit-icon"></div>
+        <div class="commit-sha">${escHtml(c.sha)}</div>
+        <div class="commit-msg">${escHtml(c.message).slice(0,50)}</div>
+        <div class="commit-meta">${escHtml(c.author)}</div>
+      </div>`).join("");
+    }
+
+    // PRs preview
+    const prs = prsData.items || [];
+    if (prs.length === 0) { document.getElementById("pr-preview").innerHTML = '<div class="empty"><p>No open PRs</p></div>'; }
+    else {
+      document.getElementById("pr-preview").innerHTML = prs.map(p => `<div class="pr-node">
+        <div class="pr-icon ${p.draft ? 'open' : 'open'}">&#10095;</div>
+        <div class="pr-info"><div class="pr-title"><a href="${escHtml(p.url)}" target="_blank">${escHtml(p.title)}</a></div>
+        <div class="pr-meta">#${p.number} &middot; ${escHtml(p.head)} \u2192 ${escHtml(p.base)} &middot; ${escHtml(p.author)}</div></div>
+      </div>`).join("");
+    }
+
+    // Populate branch filter for commits page
+    const sel = document.getElementById("commit-branch-filter");
+    sel.innerHTML = branches.map(b => `<option value="${escHtml(b.name)}"${b.is_head?' selected':''}>${escHtml(b.name)}</option>`).join("");
+  } catch (e) { toast("Failed to load repository: " + e.message, "error"); }
 }
 
-// ── Eval Chart ────────────────────────────────────────────────────
-let evalChart = null;
-let evalChart2 = null;
+// ── Commits & PRs page ────────────────────────────────────
+async function loadCommits(page) {
+  _commitsPage = page || 1;
+  try {
+    const branch = document.getElementById("commit-branch-filter").value;
+    const data = await api(`/api/repo/commits?per_page=20&page=${_commitsPage}&branch=${encodeURIComponent(branch)}`);
+    const items = data.items || [];
+    document.getElementById("commit-count-2").textContent = data.total || 0;
+    if (items.length === 0) { document.getElementById("commits-full").innerHTML = '<div class="empty"><p>No commits</p></div>'; return; }
+    document.getElementById("commits-full").innerHTML = items.map(c => `<div class="commit-node">
+      <div class="commit-icon"></div>
+      <div class="commit-sha">${escHtml(c.sha)}</div>
+      <div class="commit-msg">${escHtml(c.message).slice(0,60)}${c.files_changed > 0 ? `<span style="font-size:0.7rem;color:var(--text-muted);margin-left:0.5rem">+${c.files_changed} files</span>` : ''}</div>
+      <div class="commit-meta">${escHtml(c.author)} <span style="color:var(--text-muted)">${fmtDateTime(c.time)}</span></div>
+    </div>`).join("");
+    const total = data.total || 0; const pages = Math.max(1, Math.ceil(total / 20));
+    document.getElementById("commits-pagination").innerHTML = `<button class="btn btn-sm" onclick="loadCommits(${_commitsPage-1})" ${_commitsPage<=1?'disabled':''}>&larr; Prev</button> <span>Page ${_commitsPage} of ${pages}</span> <button class="btn btn-sm" onclick="loadCommits(${_commitsPage+1})" ${_commitsPage>=pages?'disabled':''}>Next &rarr;</button>`;
+  } catch (e) { document.getElementById("commits-full").innerHTML = `<div class="empty"><p>Failed: ${e.message}</p></div>`; }
+}
 
+async function loadPRs(page) {
+  _prsPage = page || 1;
+  try {
+    const state = document.getElementById("pr-state-filter").value;
+    const data = await api(`/api/repo/pulls?state=${state}&per_page=20&page=${_prsPage}`);
+    const items = data.items || [];
+    document.getElementById("pr-count-2").textContent = data.total || items.length;
+    if (items.length === 0) { document.getElementById("prs-full").innerHTML = '<div class="empty"><p>No PRs</p></div>'; return; }
+    document.getElementById("prs-full").innerHTML = items.map(p => `<div class="pr-node">
+      <div class="pr-icon ${p.draft ? 'open' : p.state}">${p.state === 'open' ? '&#10095;' : (p.state === 'closed' ? '&#10007;' : '&#10003;')}</div>
+      <div class="pr-info"><div class="pr-title"><a href="${escHtml(p.url)}" target="_blank">${escHtml(p.title)}</a>${p.draft ? ' <span style="font-size:0.65rem;color:var(--yellow)">DRAFT</span>' : ''}</div>
+      <div class="pr-meta">#${p.number} &middot; ${escHtml(p.head)} \u2192 ${escHtml(p.base)} &middot; ${escHtml(p.author)} &middot; ${fmtDate(p.created_at)}</div></div>
+    </div>`).join("");
+    const total = data.total || 0; const pages = Math.max(1, Math.ceil(total / 20));
+    document.getElementById("prs-pagination").innerHTML = `<button class="btn btn-sm" onclick="loadPRs(${_prsPage-1})" ${_prsPage<=1?'disabled':''}>&larr; Prev</button> <span>Page ${_prsPage} of ${pages}</span> <button class="btn btn-sm" onclick="loadPRs(${_prsPage+1})" ${_prsPage>=pages?'disabled':''}>Next &rarr;</button>`;
+  } catch (e) { document.getElementById("prs-full").innerHTML = `<div class="empty"><p>Failed: ${e.message}</p></div>`; }
+}
+
+// ── Eval ──────────────────────────────────────────────────
+let evalChart = null, evalChart2 = null;
 async function loadEvalRuns() {
   try {
     const runs = await api("/api/eval/runs?limit=30");
     document.getElementById("eval-count").textContent = runs.length + " runs";
     const labels = runs.map(r => fmtDate(r.created_at)).reverse();
     const scores = runs.map(r => r.overall_score != null ? r.overall_score * 100 : null).reverse();
-    if (runs.length === 0) {
-      document.querySelector("#page-dashboard .chart-container").innerHTML = '<div class="empty"><p>No eval runs yet</p></div>';
-      return;
-    }
+    if (runs.length === 0) { document.querySelector("#page-dashboard .chart-container").innerHTML = '<div class="empty"><p>No eval runs yet</p></div>'; return; }
     drawEvalChart("eval-chart", labels, scores);
-  } catch (e) {
-    // skip
-  }
+  } catch (e) {}
 }
-
 async function loadEvalRuns2() {
   try {
     const runs = await api("/api/eval/runs?limit=30");
@@ -895,149 +708,67 @@ async function loadEvalRuns2() {
     const labels = runs.map(r => fmtDate(r.created_at)).reverse();
     const scores = runs.map(r => r.overall_score != null ? r.overall_score * 100 : null).reverse();
     drawEvalChart("eval-chart-2", labels, scores);
-
-    // table
-    if (runs.length === 0) {
-      document.getElementById("eval-runs-table").innerHTML = '<div class="empty"><p>No eval runs</p></div>';
-      return;
-    }
+    if (runs.length === 0) { document.getElementById("eval-runs-table").innerHTML = '<div class="empty"><p>No runs</p></div>'; return; }
     let html = `<table><thead><tr><th>Run ID</th><th>Score</th><th>Class. Acc</th><th>Action Acc</th><th>Cases</th><th>Failures</th><th>Time</th></tr></thead><tbody>`;
     for (const r of runs) {
-      html += `<tr>
-        <td style="font-family:monospace;font-size:0.75rem">${escHtml(r.run_id).slice(0, 12)}</td>
-        <td><strong>${r.overall_score != null ? (r.overall_score * 100).toFixed(1) + "%" : "\u2014"}</strong></td>
-        <td>${r.classification_accuracy != null ? (r.classification_accuracy * 100).toFixed(1) + "%" : "\u2014"}</td>
-        <td>${r.action_accuracy != null ? (r.action_accuracy * 100).toFixed(1) + "%" : "\u2014"}</td>
+      html += `<tr><td style="font-family:monospace;font-size:0.75rem">${escHtml(r.run_id).slice(0,12)}</td>
+        <td><strong>${r.overall_score != null ? (r.overall_score*100).toFixed(1)+"%" : "\u2014"}</strong></td>
+        <td>${r.classification_accuracy != null ? (r.classification_accuracy*100).toFixed(1)+"%" : "\u2014"}</td>
+        <td>${r.action_accuracy != null ? (r.action_accuracy*100).toFixed(1)+"%" : "\u2014"}</td>
         <td>${r.total_cases ?? "\u2014"}</td>
         <td style="color:${r.failures > 0 ? 'var(--red)' : 'var(--green)'}">${r.failures ?? 0}</td>
-        <td style="font-size:0.75rem;color:var(--text-muted)">${fmtDate(r.created_at)}</td>
-      </tr>`;
+        <td style="font-size:0.75rem;color:var(--text-muted)">${fmtDate(r.created_at)}</td></tr>`;
     }
-    html += "</tbody></table>";
-    document.getElementById("eval-runs-table").innerHTML = html;
-  } catch (e) {
-    document.getElementById("eval-runs-table").innerHTML = `<div class="empty"><p>Failed to load</p></div>`;
-  }
+    document.getElementById("eval-runs-table").innerHTML = html + "</tbody></table>";
+  } catch (e) { document.getElementById("eval-runs-table").innerHTML = `<div class="empty"><p>Failed</p></div>`; }
 }
-
 function drawEvalChart(canvasId, labels, scores) {
   const ctx = document.getElementById(canvasId).getContext("2d");
   if (canvasId === "eval-chart" && evalChart) evalChart.destroy();
   if (canvasId === "eval-chart-2" && evalChart2) evalChart2.destroy();
   const chart = new Chart(ctx, {
     type: "line",
-    data: {
-      labels,
-      datasets: [{
-        label: "Overall Score",
-        data: scores,
-        borderColor: "#6366f1",
-        backgroundColor: "rgba(99,102,241,0.1)",
-        fill: true,
-        tension: 0.3,
-        pointRadius: 4,
-        pointBackgroundColor: "#6366f1",
-        pointBorderColor: "#1a1d27",
-        pointBorderWidth: 2,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: "#232738",
-          titleColor: "#e1e5ee",
-          bodyColor: "#8b8fa5",
-          borderColor: "#2a2e3f",
-          borderWidth: 1,
-          cornerRadius: 6,
-          callbacks: { label: ctx => ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) + "%" : "" },
-        },
-      },
-      scales: {
-        x: {
-          ticks: { color: "#8b8fa5", maxTicksLimit: 8, font: { size: 10 } },
-          grid: { color: "rgba(42,46,63,0.5)" },
-        },
-        y: {
-          min: 0, max: 100,
-          ticks: { color: "#8b8fa5", callback: v => v + "%", font: { size: 10 } },
-          grid: { color: "rgba(42,46,63,0.5)" },
-        },
-      },
-    },
+    data: { labels, datasets: [{ label: "Score", data: scores, borderColor: "#6366f1", backgroundColor: "rgba(99,102,241,0.1)", fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: "#6366f1", pointBorderColor: "#1a1d27", pointBorderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: "#232738", titleColor: "#e1e5ee", bodyColor: "#8b8fa5", borderColor: "#2a2e3f", borderWidth: 1, cornerRadius: 6, callbacks: { label: ctx => ctx.parsed.y != null ? ctx.parsed.y.toFixed(1)+"%" : "" } } }, scales: { x: { ticks: { color: "#8b8fa5", maxTicksLimit: 8, font: { size: 10 } }, grid: { color: "rgba(42,46,63,0.5)" } }, y: { min: 0, max: 100, ticks: { color: "#8b8fa5", callback: v => v+"%", font: { size: 10 } }, grid: { color: "rgba(42,46,63,0.5)" } } } },
   });
-  if (canvasId === "eval-chart") evalChart = chart;
-  else evalChart2 = chart;
+  if (canvasId === "eval-chart") evalChart = chart; else evalChart2 = chart;
 }
-
-// ── Run Eval ──────────────────────────────────────────────────────
 async function runEval() {
   const btn = document.querySelector("#page-evaluations .btn-primary");
-  const running = document.getElementById("eval-running");
-  const result = document.getElementById("eval-result");
-  btn.disabled = true;
-  running.style.display = "inline";
-  result.innerHTML = "";
+  const running = document.getElementById("eval-running"); const result = document.getElementById("eval-result");
+  btn.disabled = true; running.style.display = "inline"; result.innerHTML = "";
   try {
     const data = await fetch("/api/eval/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).then(r => r.json());
     result.innerHTML = `<div style="display:flex;gap:1rem;flex-wrap:wrap">
-      <div class="card" style="flex:1"><div class="label">Overall Score</div><div class="value purple">${(data.overall_score * 100).toFixed(1)}%</div></div>
-      <div class="card" style="flex:1"><div class="label">Classification Acc</div><div class="value blue">${(data.classification_accuracy * 100).toFixed(1)}%</div></div>
-      <div class="card" style="flex:1"><div class="label">Action Acc</div><div class="value green">${(data.action_accuracy * 100).toFixed(1)}%</div></div>
-      <div class="card" style="flex:1"><div class="label">Cases / Failures</div><div class="value accent">${data.total_cases}<span style="font-size:1rem;color:var(--text-muted)"> / </span><span style="color:${data.failures > 0 ? 'var(--red)' : 'var(--green)'}">${data.failures}</span></div></div>
-    </div>`;
-    toast("Evaluation complete", "success");
-    loadEvalRuns2();
-    loadEvalRuns();
-  } catch (e) {
-    result.innerHTML = `<div style="color:var(--red);font-size:0.85rem">Error: ${escHtml(e.message)}</div>`;
-    toast("Eval failed: " + e.message, "error");
-  }
-  btn.disabled = false;
-  running.style.display = "none";
+      <div class="card" style="flex:1"><div class="label">Score</div><div class="value purple">${(data.overall_score*100).toFixed(1)}%</div></div>
+      <div class="card" style="flex:1"><div class="label">Class Acc</div><div class="value blue">${(data.classification_accuracy*100).toFixed(1)}%</div></div>
+      <div class="card" style="flex:1"><div class="label">Action Acc</div><div class="value green">${(data.action_accuracy*100).toFixed(1)}%</div></div>
+      <div class="card" style="flex:1"><div class="label">Cases/Fail</div><div class="value accent">${data.total_cases} / <span style="color:${data.failures>0?'var(--red)':'var(--green)'}">${data.failures}</span></div></div></div>`;
+    toast("Evaluation complete", "success"); loadEvalRuns2(); loadEvalRuns();
+  } catch (e) { result.innerHTML = `<div style="color:var(--red)">Error: ${escHtml(e.message)}</div>`; toast("Eval failed", "error"); }
+  btn.disabled = false; running.style.display = "none";
 }
 
-// ── Settings ──────────────────────────────────────────────────────
+// ── Settings ───────────────────────────────────────────────
 async function loadSettings() {
   try {
     const h = await api("/health");
-    let llmHtml = `<div class="settings-row"><div><div class="label">Provider</div><div class="desc">LLM provider in use</div></div><div class="value">${escHtml(h.llm_provider || "Not configured")}</div></div>
-      <div class="settings-row"><div><div class="label">Model</div><div class="desc">Active model</div></div><div class="value">${escHtml(h.llm_model || "\u2014")}</div></div>`;
-    document.getElementById("settings-llm").innerHTML = llmHtml;
-
-    let sysHtml = `<div class="settings-row"><div><div class="label">Uptime</div><div class="desc">Server running time</div></div><div class="value">${(h.uptime_seconds / 3600).toFixed(1)} hours</div></div>
-      <div class="settings-row"><div><div class="label">Version</div><div class="desc">API version</div></div><div class="value">v${escHtml(h.version || "0.1.0")}</div></div>`;
-    document.getElementById("settings-system").innerHTML = sysHtml;
-
-    let toolsHtml = `<div class="settings-row"><div><div class="label">Registered Tools</div><div class="desc">Tool handlers available to the agent</div></div><div class="value">${h.tools_registered ?? 0}</div></div>`;
-    document.getElementById("settings-tools").innerHTML = toolsHtml;
-  } catch (e) {
-    document.querySelectorAll("#settings-llm, #settings-system, #settings-tools").forEach(el => {
-      el.innerHTML = `<div class="empty"><p>Failed to load settings</p></div>`;
-    });
-  }
+    document.getElementById("settings-llm").innerHTML =
+      `<div class="settings-row"><div><div class="label">Provider</div><div class="desc">LLM provider</div></div><div class="value">${escHtml(h.llm_provider||"Not configured")}</div></div>
+      <div class="settings-row"><div><div class="label">Model</div><div class="desc">Active model</div></div><div class="value">${escHtml(h.llm_model||"\u2014")}</div></div>`;
+    document.getElementById("settings-system").innerHTML =
+      `<div class="settings-row"><div><div class="label">Uptime</div><div class="desc">Server running time</div></div><div class="value">${(h.uptime_seconds/3600).toFixed(1)} hours</div></div>
+      <div class="settings-row"><div><div class="label">Version</div><div class="desc">API version</div></div><div class="value">v${escHtml(h.version||"0.1.0")}</div></div>`;
+    document.getElementById("settings-tools").innerHTML =
+      `<div class="settings-row"><div><div class="label">Registered Tools</div><div class="desc">Tool handlers</div></div><div class="value">${h.tools_registered ?? 0}</div></div>`;
+  } catch (e) { document.querySelectorAll("#settings-llm, #settings-system, #settings-tools").forEach(el => { el.innerHTML = '<div class="empty"><p>Failed</p></div>'; }); }
 }
 
-// ── Polling for logs (auto-refresh on logs page) ───────────────────
-setInterval(() => {
-  const logsPage = document.getElementById("page-logs");
-  if (logsPage && logsPage.classList.contains("active")) {
-    loadLogs();
-  }
-}, 5000);
+// ── Polling ────────────────────────────────────────────────
+setInterval(() => { const p = document.getElementById("page-logs"); if (p && p.classList.contains("active")) loadLogs(); }, 5000);
+setInterval(() => { const p = document.getElementById("page-dashboard"); if (p && p.classList.contains("active")) { loadStats(); loadIssuesSummary(); } }, 15000);
 
-setInterval(() => {
-  const dashPage = document.getElementById("page-dashboard");
-  if (dashPage && dashPage.classList.contains("active")) {
-    loadStats();
-    loadIssuesSummary();
-  }
-}, 15000);
-
-// ── SSE ──────────────────────────────────────────────────────────────
+// ── SSE ────────────────────────────────────────────────────
 function connectSSE() {
   const es = new EventSource("/api/events");
   es.addEventListener("issue", () => { loadStats(); loadIssuesSummary(); });
@@ -1045,7 +776,6 @@ function connectSSE() {
   es.onerror = () => { es.close(); setTimeout(connectSSE, 5000); };
 }
 
-// ── Init ──────────────────────────────────────────────────────────
 async function init() {
   await loadHealth();
   await Promise.all([loadStats(), loadIssuesSummary(), loadEvalRuns()]);

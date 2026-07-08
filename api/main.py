@@ -162,6 +162,110 @@ async def dashboard():
     return HTMLResponse(content=_load_dashboard())
 
 
+# ── Repo (Branches, Commits, PRs) ────────────────────────────────
+
+import git as gitpy
+
+_repo_instance = None
+
+
+def _get_repo():
+    global _repo_instance
+    if _repo_instance is None:
+        import git
+        path = os.environ.get("REPO_LOCAL_PATH", ".")
+        _repo_instance = git.Repo(path)
+    return _repo_instance
+
+
+@app.get("/api/repo/branches", tags=["Repository"])
+async def list_branches():
+    """List all local branches with latest commit info."""
+    try:
+        repo = _get_repo()
+        branches = []
+        for b in repo.branches:
+            commit = b.commit
+            branches.append({
+                "name": b.name,
+                "is_head": b.name == repo.active_branch.name,
+                "commit_sha": commit.hexsha[:8],
+                "commit_message": commit.message.strip().split("\n")[0],
+                "commit_author": str(commit.author),
+                "commit_time": datetime.utcfromtimestamp(commit.committed_date).isoformat() + "Z",
+            })
+        return sorted(branches, key=lambda x: x["commit_time"], reverse=True)
+    except Exception as e:
+        logger.error("Failed to list branches: %s", e)
+        return []
+
+
+@app.get("/api/repo/commits", tags=["Repository"])
+async def list_commits(
+    branch: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+):
+    """List commits with pagination."""
+    try:
+        repo = _get_repo()
+        head = branch or repo.active_branch.name
+        commits = list(repo.iter_commits(head, max_count=page * per_page))
+        start = (page - 1) * per_page
+        items = commits[start:start + per_page]
+        result = []
+        for c in items:
+            result.append({
+                "sha": c.hex[:8],
+                "full_sha": c.hex,
+                "message": c.message.strip().split("\n")[0],
+                "body": "\n".join(c.message.strip().split("\n")[1:]).strip(),
+                "author": str(c.author),
+                "email": str(c.author.email) if hasattr(c.author, "email") else "",
+                "time": datetime.utcfromtimestamp(c.committed_date).isoformat() + "Z",
+                "files_changed": len(c.stats.files) if c.stats else 0,
+            })
+        return {"items": result, "total": len(commits), "page": page, "per_page": per_page}
+    except Exception as e:
+        logger.error("Failed to list commits: %s", e)
+        return {"items": [], "total": 0, "page": page, "per_page": per_page}
+
+
+@app.get("/api/repo/pulls", tags=["Repository"])
+async def list_pulls(
+    state: str = Query("open"),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+):
+    """List pull requests from GitHub."""
+    try:
+        from core.github import GitHubClient
+        gh = GitHubClient()
+        repo = gh.get_repo()
+        pulls = repo.get_pulls(state=state, sort="updated", direction="desc")
+        all_pulls = list(pulls[:page * per_page])
+        start = (page - 1) * per_page
+        items = all_pulls[start:start + per_page]
+        result = []
+        for pr in items:
+            result.append({
+                "number": pr.number,
+                "title": pr.title,
+                "state": pr.state,
+                "draft": getattr(pr, "draft", False),
+                "author": pr.user.login if pr.user else "unknown",
+                "head": pr.head.ref,
+                "base": pr.base.ref,
+                "created_at": pr.created_at.isoformat() + "Z" if pr.created_at else None,
+                "updated_at": pr.updated_at.isoformat() + "Z" if pr.updated_at else None,
+                "url": pr.html_url,
+            })
+        return {"items": result, "total": len(all_pulls), "page": page, "per_page": per_page}
+    except Exception as e:
+        logger.error("Failed to list pulls: %s", e)
+        return {"items": [], "total": 0, "page": page, "per_page": per_page}
+
+
 # ── Logs ──────────────────────────────────────────────────────────
 
 _LOG_BUFFER: list[dict] = []
