@@ -20,6 +20,7 @@ import os
 import time
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -159,6 +160,65 @@ def _load_dashboard() -> str:
 @app.get("/", response_class=HTMLResponse, tags=["Dashboard"])
 async def dashboard():
     return HTMLResponse(content=_load_dashboard())
+
+
+# ── Logs ──────────────────────────────────────────────────────────
+
+_LOG_BUFFER: list[dict] = []
+_LOG_BUFFER_MAX = 2000
+
+
+class _LogHandler(logging.Handler):
+    """Captures log records into an in-memory ring buffer for the dashboard."""
+    def emit(self, record: logging.LogRecord):
+        global _LOG_BUFFER
+        entry = {
+            "time": datetime.utcfromtimestamp(record.created).isoformat() + "Z",
+            "level": record.levelname.lower(),
+            "message": record.getMessage(),
+            "name": record.name,
+            "badge": _infer_badge(record),
+        }
+        _LOG_BUFFER.append(entry)
+        if len(_LOG_BUFFER) > _LOG_BUFFER_MAX:
+            _LOG_BUFFER = _LOG_BUFFER[-_LOG_BUFFER_MAX:]
+
+
+def _infer_badge(record: logging.LogRecord) -> str:
+    msg = record.getMessage().lower()
+    if any(w in msg for w in ("llm", "chat", "provider", "model")):
+        return "llm"
+    if any(w in msg for w in ("http", "get ", "post ", "webhook")):
+        return "http"
+    if any(w in msg for w in ("orchestrat", "iteration", "agent", "decision")):
+        return "agent"
+    if any(w in msg for w in ("tool", "classify", "register")):
+        return "tool"
+    return ""
+
+
+# Install the custom handler at startup
+_log_handler = _LogHandler()
+_log_handler.setLevel(logging.DEBUG)
+logging.getLogger().addHandler(_log_handler)
+
+
+@app.get("/api/logs", tags=["System"])
+async def get_logs(
+    level: Optional[str] = None,
+    limit: int = Query(200, ge=1, le=2000),
+    since: Optional[str] = None,
+):
+    """Return recent log entries from the in-memory buffer.
+
+    Optionally filter by level (info, warning, error, debug) and since
+    (ISO timestamp)."""
+    logs = list(_LOG_BUFFER)
+    if level:
+        logs = [l for l in logs if l["level"] == level.lower()]
+    if since:
+        logs = [l for l in logs if l["time"] >= since]
+    return logs[-limit:]
 
 
 # ── Health ─────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Repo Copilot Dashboard</title>
+<title>Repo Copilot</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -20,6 +20,7 @@
     --red: #ef4444;
     --blue: #3b82f6;
     --purple: #a855f7;
+    --sidebar-w: 240px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -27,32 +28,84 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-  }
-  .header {
-    border-bottom: 1px solid var(--border);
-    padding: 1rem 2rem;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--surface);
   }
-  .header h1 {
-    font-size: 1.25rem;
-    font-weight: 600;
+
+  /* ── Sidebar ─────────────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 1.25rem 1.25rem 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
   }
-  .header h1 span { color: var(--accent); }
-  .header .badge {
-    font-size: 0.7rem;
-    background: var(--surface-2);
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
+  .sidebar-brand span { color: var(--accent); }
+  .sidebar-nav { flex: 1; padding: 0.75rem 0; }
+  .sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1.25rem;
     color: var(--text-muted);
-    border: 1px solid var(--border);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
   }
-  .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem 2rem; }
+  .sidebar-nav a:hover { color: var(--text); background: var(--surface-2); }
+  .sidebar-nav a.active {
+    color: var(--accent-hover);
+    background: rgba(99,102,241,0.08);
+    border-left-color: var(--accent);
+  }
+  .sidebar-nav a .icon { width: 20px; text-align: center; font-size: 1rem; }
+  .sidebar-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .sidebar-footer .status-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 0.4rem;
+  }
+  .sidebar-footer .status-dot.online { background: var(--green); }
+  .sidebar-footer .status-dot.offline { background: var(--red); }
+
+  /* ── Main Content ────────────────────────────────────── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 0;
+  }
+  .page-header {
+    padding: 1.5rem 2rem 0;
+  }
+  .page-header h1 { font-size: 1.5rem; font-weight: 700; }
+  .page-header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem; }
+  .page-content { padding: 1.5rem 2rem 2rem; }
+
+  /* ── Page visibility ─────────────────────────────────── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Cards ────────────────────────────────────────────── */
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
   .card {
     background: var(--surface);
@@ -72,6 +125,7 @@
   .card .value.blue { color: var(--blue); }
   .card .value.purple { color: var(--purple); }
 
+  /* ── Panels ───────────────────────────────────────────── */
   .panel {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -93,7 +147,9 @@
     padding: 0.2rem 0.6rem;
     border-radius: 4px;
   }
+  .panel-body { padding: 1rem 1.25rem; }
 
+  /* ── Tables ───────────────────────────────────────────── */
   table { width: 100%; border-collapse: collapse; }
   th {
     text-align: left;
@@ -126,10 +182,13 @@
   .label-tag.unclear { background: rgba(234,179,8,0.15); color: var(--yellow); }
   .label-tag.opened_pr { background: rgba(34,197,94,0.15); color: var(--green); }
   .label-tag.commented { background: rgba(99,102,241,0.15); color: var(--accent); }
+  .label-tag.no_action { background: rgba(139,143,165,0.15); color: var(--text-muted); }
 
+  /* ── Charts ───────────────────────────────────────────── */
   .chart-container { padding: 1.25rem; }
   .chart-container canvas { max-height: 280px; }
 
+  /* ── Empty state ───────────────────────────────────────── */
   .empty {
     text-align: center;
     padding: 3rem 1.25rem;
@@ -138,23 +197,7 @@
   .empty p { font-size: 0.9rem; margin-bottom: 0.5rem; }
   .empty .hint { font-size: 0.8rem; }
 
-  .tooltip {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.6rem 1rem;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    display: none;
-  }
-  .tooltip.visible { display: block; }
-
-  a { color: var(--accent-hover); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-
+  /* ── Loading ───────────────────────────────────────────── */
   .loading {
     display: flex;
     align-items: center;
@@ -174,21 +217,40 @@
 
   .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
 
+  /* ── Distribution bars ────────────────────────────────── */
   .dist-bar { display: flex; align-items: center; gap: 0.5rem; margin: 0.3rem 0; }
   .dist-bar .dist-label { width: 80px; font-size: 0.8rem; color: var(--text-muted); }
   .dist-bar .dist-track { flex: 1; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
   .dist-bar .dist-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
   .dist-bar .dist-count { width: 30px; text-align: right; font-size: 0.8rem; font-weight: 600; }
 
-  .btn-reprocess {
+  /* ── Buttons ───────────────────────────────────────────── */
+  .btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .btn:hover { background: var(--border); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+  .btn-icon {
     background: none; border: 1px solid var(--border); border-radius: 4px;
     cursor: pointer; color: var(--text-muted); font-size: 1rem;
-    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
     transition: all 0.2s;
   }
-  .btn-reprocess:hover { background: var(--surface-2); color: var(--accent); border-color: var(--accent); }
-  .btn-reprocess:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-icon:hover { background: var(--surface-2); color: var(--accent); border-color: var(--accent); }
+  .btn-icon:disabled { opacity: 0.5; cursor: not-allowed; }
 
+  /* ── Toast ─────────────────────────────────────────────── */
   #toast-container {
     position: fixed; top: 1rem; right: 1rem; z-index: 999;
     display: flex; flex-direction: column; gap: 0.5rem;
@@ -205,194 +267,383 @@
   .toast.error { border-color: var(--red); }
   @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
 
+  /* ── Search / Filter ───────────────────────────────────── */
+  .search-bar {
+    display: flex; gap: 0.75rem; align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .search-bar input {
+    flex: 1;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    color: var(--text);
+    font-size: 0.85rem;
+    outline: none;
+  }
+  .search-bar input:focus { border-color: var(--accent); }
+  .search-bar select {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    color: var(--text);
+    font-size: 0.85rem;
+    outline: none;
+  }
+
+  /* ── Logs View ─────────────────────────────────────────── */
+  .log-container {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+  .log-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.35rem 1.25rem;
+    border-bottom: 1px solid rgba(42,46,63,0.4);
+    transition: background 0.1s;
+  }
+  .log-entry:hover { background: rgba(35,39,56,0.5); }
+  .log-entry .log-time {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    white-space: nowrap;
+    min-width: 75px;
+    padding-top: 0.05rem;
+  }
+  .log-entry .log-level {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    min-width: 44px;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+  .log-entry .log-level.info { background: rgba(59,130,246,0.12); color: var(--blue); }
+  .log-entry .log-level.warning { background: rgba(234,179,8,0.12); color: var(--yellow); }
+  .log-entry .log-level.error { background: rgba(239,68,68,0.12); color: var(--red); }
+  .log-entry .log-level.debug { background: rgba(139,143,165,0.12); color: var(--text-muted); }
+  .log-entry .log-msg { flex: 1; word-break: break-word; }
+  .log-entry .log-badge {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    margin-left: 0.35rem;
+    white-space: nowrap;
+  }
+  .log-entry .log-badge.llm { background: rgba(168,85,247,0.12); color: var(--purple); }
+  .log-entry .log-badge.http { background: rgba(99,102,241,0.12); color: var(--accent); }
+  .log-entry .log-badge.agent { background: rgba(34,197,94,0.12); color: var(--green); }
+  .log-entry .log-badge.tool { background: rgba(234,179,8,0.12); color: var(--yellow); }
+
+  .log-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .log-controls select, .log-controls input {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    color: var(--text);
+    font-size: 0.8rem;
+    outline: none;
+  }
+  .log-controls select:focus, .log-controls input:focus { border-color: var(--accent); }
+
+  /* ── Settings ──────────────────────────────────────────── */
+  .settings-group { margin-bottom: 1.5rem; }
+  .settings-group h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-row .label { font-size: 0.85rem; }
+  .settings-row .desc { font-size: 0.75rem; color: var(--text-muted); }
+  .settings-row .value { font-family: monospace; font-size: 0.8rem; color: var(--accent); }
+
+  .footer-info {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+  }
+
   @media (max-width: 768px) {
+    body { flex-direction: column; }
+    .sidebar { width: 100%; min-height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 0.5rem 1rem; }
+    .sidebar-brand { border-bottom: none; padding: 0.25rem 0.5rem; }
+    .sidebar-nav { display: flex; gap: 0.25rem; padding: 0.25rem 0; }
+    .sidebar-nav a { padding: 0.4rem 0.75rem; border-left: none; border-radius: 6px; }
+    .sidebar-nav a.active { border-left-color: transparent; }
+    .sidebar-footer { display: none; }
+    .main { margin-left: 0; }
     .grid-2 { grid-template-columns: 1fr; }
-    .container { padding: 1rem; }
-    .header { padding: 0.75rem 1rem; }
-    th, td { padding: 0.5rem 0.75rem; }
+    .page-content { padding: 1rem; }
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1><span>&#9670;</span> Repo Copilot</h1>
-  <span class="badge" id="header-status">connecting...</span>
-</div>
+<!-- ── Sidebar ──────────────────────────────────────────── -->
+<nav class="sidebar">
+  <div class="sidebar-brand"><span>&#9670;</span> Repo Copilot</div>
+  <div class="sidebar-nav">
+    <a href="#" data-page="dashboard" class="active"><span class="icon">&#9632;</span> Dashboard</a>
+    <a href="#" data-page="issues"><span class="icon">&#9881;</span> Issues</a>
+    <a href="#" data-page="logs"><span class="icon">&#9776;</span> Logs</a>
+    <a href="#" data-page="evaluations"><span class="icon">&#10003;</span> Evaluations</a>
+    <a href="#" data-page="settings"><span class="icon">&#9881;</span> Settings</a>
+  </div>
+  <div class="sidebar-footer">
+    <div><span class="status-dot" id="status-dot"></span><span id="status-text">connecting...</span></div>
+    <div style="margin-top:0.4rem" id="status-detail"></div>
+  </div>
+</nav>
 
-<div class="container">
+<!-- ── Main ─────────────────────────────────────────────── -->
+<div class="main">
 
-  <!-- Stats Cards -->
-  <div class="cards" id="stats-cards">
-    <div class="card"><div class="label">Issues Processed</div><div class="value accent" id="stat-issues">—</div></div>
-    <div class="card"><div class="label">Decisions Made</div><div class="value blue" id="stat-decisions">—</div></div>
-    <div class="card"><div class="label">PRs Opened</div><div class="value green" id="stat-prs">—</div></div>
-    <div class="card"><div class="label">Latest Eval Score</div><div class="value purple" id="stat-eval">—</div></div>
+  <!-- ==================== DASHBOARD ==================== -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <p>Overview of issues, decisions, and evaluation scores</p>
+    </div>
+    <div class="page-content">
+
+      <div class="cards" id="stats-cards">
+        <div class="card"><div class="label">Issues Processed</div><div class="value accent" id="stat-issues">—</div></div>
+        <div class="card"><div class="label">Decisions Made</div><div class="value blue" id="stat-decisions">—</div></div>
+        <div class="card"><div class="label">PRs Opened</div><div class="value green" id="stat-prs">—</div></div>
+        <div class="card"><div class="label">Latest Eval Score</div><div class="value purple" id="stat-eval">—</div></div>
+        <div class="card"><div class="label">Uptime</div><div class="value accent" id="stat-uptime">—</div><div class="sub">hours</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Classification Distribution</h2>
+            </div>
+            <div class="panel-body" id="classification-dist"></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="panel-header"><h2>Actions Taken</h2></div>
+            <div class="panel-body" id="action-dist"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><h2>Recent Activity</h2></div>
+            <div class="panel-body" id="recent-activity">
+              <div class="loading"><div class="spinner"></div> Loading...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Eval Score History</h2><span class="count" id="eval-count">0 runs</span></div>
+        <div class="chart-container"><canvas id="eval-chart"></canvas></div>
+      </div>
+
+    </div>
   </div>
 
-  <div class="grid-2">
-    <div>
-      <!-- Recent Issues -->
+  <!-- ==================== ISSUES ==================== -->
+  <div class="page" id="page-issues">
+    <div class="page-header">
+      <h1>Issues</h1>
+      <p>All processed GitHub issues with agent decisions</p>
+    </div>
+    <div class="page-content">
       <div class="panel">
-        <div class="panel-header">
-          <h2>Recent Issues</h2>
-          <span class="count" id="issues-count">0</span>
+        <div class="search-bar">
+          <input type="text" id="issues-search" placeholder="Search issues..." oninput="filterIssues()">
+          <select id="issues-filter" onchange="filterIssues()">
+            <option value="all">All</option>
+            <option value="bug">Bug</option>
+            <option value="feature">Feature</option>
+            <option value="duplicate">Duplicate</option>
+            <option value="unclear">Unclear</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="loadIssues()">Refresh</button>
         </div>
         <div id="issues-table">
           <div class="loading"><div class="spinner"></div> Loading issues...</div>
         </div>
       </div>
-
-      <!-- Eval History Chart -->
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Eval Score History</h2>
-          <span class="count" id="eval-count">0 runs</span>
-        </div>
-        <div class="chart-container">
-          <canvas id="eval-chart"></canvas>
-        </div>
-      </div>
     </div>
+  </div>
 
-    <div>
-      <!-- Distribution -->
+  <!-- ==================== LOGS ==================== -->
+  <div class="page" id="page-logs">
+    <div class="page-header">
+      <h1>Logs</h1>
+      <p>Real-time structured log stream</p>
+    </div>
+    <div class="page-content">
       <div class="panel">
-        <div class="panel-header"><h2>Classifications</h2></div>
-        <div style="padding:1rem 1.25rem;" id="classification-dist"></div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header"><h2>Actions Taken</h2></div>
-        <div style="padding:1rem 1.25rem;" id="action-dist"></div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header"><h2>Quick Actions</h2></div>
-        <div style="padding:1rem 1.25rem;">
-          <button onclick="runEval()" style="width:100%;padding:0.6rem;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:500;">Run Evaluation Suite</button>
-          <div id="eval-result" style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-muted);"></div>
+        <div class="log-controls">
+          <select id="log-level-filter" onchange="filterLogs()">
+            <option value="all">All Levels</option>
+            <option value="info">INFO</option>
+            <option value="warning">WARNING</option>
+            <option value="error">ERROR</option>
+            <option value="debug">DEBUG</option>
+          </select>
+          <input type="text" id="log-search" placeholder="Search logs..." oninput="filterLogs()" style="flex:1">
+          <span style="font-size:0.75rem;color:var(--text-muted);" id="log-count"></span>
+          <button class="btn btn-sm" onclick="loadLogs()">Refresh</button>
+          <button class="btn btn-sm btn-primary" id="log-auto-scroll-btn" onclick="toggleAutoScroll()">Auto-scroll ON</button>
+          <button class="btn btn-sm" onclick="clearLogs()">Clear</button>
+        </div>
+        <div id="log-container" class="log-container" style="max-height:65vh;overflow-y:auto">
+          <div class="loading"><div class="spinner"></div> Loading logs...</div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- ==================== EVALUATIONS ==================== -->
+  <div class="page" id="page-evaluations">
+    <div class="page-header">
+      <h1>Evaluations</h1>
+      <p>Automated evaluation runs and accuracy metrics</p>
+    </div>
+    <div class="page-content">
+      <div style="margin-bottom:1rem;display:flex;gap:0.75rem;align-items:center">
+        <button class="btn btn-primary" onclick="runEval()">Run Evaluation Suite</button>
+        <span id="eval-running" style="display:none;font-size:0.8rem;color:var(--text-muted)">Running...</span>
+      </div>
+      <div id="eval-result" style="margin-bottom:1.5rem;"></div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Eval Score History</h2><span class="count" id="eval-count-2">0 runs</span></div>
+        <div class="chart-container"><canvas id="eval-chart-2"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Eval Runs</h2></div>
+        <div id="eval-runs-table">
+          <div class="loading"><div class="spinner"></div> Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SETTINGS ==================== -->
+  <div class="page" id="page-settings">
+    <div class="page-header">
+      <h1>Settings</h1>
+      <p>System configuration and environment</p>
+    </div>
+    <div class="page-content">
+      <div class="panel">
+        <div class="panel-header"><h2>LLM Configuration</h2></div>
+        <div class="panel-body" id="settings-llm">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>System</h2></div>
+        <div class="panel-body" id="settings-system">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2>Tools</h2></div>
+        <div class="panel-body" id="settings-tools">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-info">
+    Repo Copilot &middot; v0.1.0
+  </div>
 </div>
 
-<div class="tooltip" id="tooltip"></div>
 <div id="toast-container"></div>
 
 <script>
 const API = "";
 
+// ── Routing ───────────────────────────────────────────────────────
+function navigate(page) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".sidebar-nav a").forEach(a => a.classList.remove("active"));
+  const target = document.getElementById("page-" + page);
+  if (target) target.classList.add("active");
+  const link = document.querySelector(`.sidebar-nav a[data-page="${page}"]`);
+  if (link) link.classList.add("active");
+}
+
+document.querySelectorAll(".sidebar-nav a").forEach(a => {
+  a.addEventListener("click", e => {
+    e.preventDefault();
+    const page = a.dataset.page;
+    navigate(page);
+    // lazy load
+    if (page === "issues") loadIssues();
+    if (page === "logs") loadLogs();
+    if (page === "evaluations") { loadEvalRuns(); loadEvalRuns2(); }
+    if (page === "settings") loadSettings();
+    if (page === "dashboard") { loadStats(); loadIssuesSummary(); loadEvalRuns(); }
+  });
+});
+
+// ── API Helper ─────────────────────────────────────────────────────
 async function api(path, opts) {
   const r = await fetch(API + path, opts || {});
   if (!r.ok) throw new Error(r.status + " " + (await r.text()).slice(0, 80));
   return r.json();
 }
 
+// ── Utils ─────────────────────────────────────────────────────────
 function tag(text, cls) {
   return `<span class="label-tag ${cls}">${text}</span>`;
 }
 
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "\u2014";
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-// ── Stats Cards ─────────────────────────────────────────────────
-
-async function loadStats() {
-  try {
-    const s = await api("/api/stats");
-    document.getElementById("stat-issues").textContent = s.total_issues ?? 0;
-    document.getElementById("stat-decisions").textContent = s.total_decisions ?? 0;
-    document.getElementById("stat-prs").textContent = s.prs_opened ?? 0;
-    const evalEl = document.getElementById("stat-eval");
-    if (s.latest_eval_score != null) {
-      evalEl.textContent = (s.latest_eval_score * 100).toFixed(0) + "%";
-    } else {
-      evalEl.textContent = "—";
-    }
-    drawDistributions(s);
-  } catch (e) {
-    document.querySelectorAll(".card .value").forEach(el => el.textContent = "err");
-  }
+function fmtDateTime(d) {
+  if (!d) return "\u2014";
+  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-function drawDistributions(s) {
-  // Classification
-  const cls = s.classification_distribution || {};
-  const clsMax = Math.max(...Object.values(cls), 1);
-  const clsColors = { bug: "#ef4444", feature: "#3b82f6", duplicate: "#a855f7", unclear: "#eab308" };
-  let clsHtml = "";
-  for (const [k, v] of Object.entries(cls).sort((a, b) => b[1] - a[1])) {
-    const pct = (v / clsMax * 100).toFixed(0);
-    clsHtml += `<div class="dist-bar"><span class="dist-label">${k}</span><div class="dist-track"><div class="dist-fill" style="width:${pct}%;background:${clsColors[k]||'#6366f1'}"></div></div><span class="dist-count">${v}</span></div>`;
-  }
-  document.getElementById("classification-dist").innerHTML = clsHtml || '<div class="empty"><p>No data</p></div>';
-
-  // Actions
-  const act = s.action_distribution || {};
-  const actMax = Math.max(...Object.values(act), 1);
-  const actColors = { opened_pr: "#22c55e", commented: "#6366f1", labeled: "#3b82f6", no_action: "#8b8fa5" };
-  let actHtml = "";
-  for (const [k, v] of Object.entries(act).sort((a, b) => b[1] - a[1])) {
-    const pct = (v / actMax * 100).toFixed(0);
-    actHtml += `<div class="dist-bar"><span class="dist-label">${k.replace("_", " ")}</span><div class="dist-track"><div class="dist-fill" style="width:${pct}%;background:${actColors[k]||'#6366f1'}"></div></div><span class="dist-count">${v}</span></div>`;
-  }
-  document.getElementById("action-dist").innerHTML = actHtml || '<div class="empty"><p>No data</p></div>';
-}
-
-// ── Issues Table ─────────────────────────────────────────────────
-
-async function loadIssues() {
-  try {
-    const data = await api("/api/issues?per_page=15");
-    document.getElementById("issues-count").textContent = data.total;
-    const items = data.items || [];
-    if (items.length === 0) {
-      document.getElementById("issues-table").innerHTML = '<div class="empty"><p>No issues processed yet</p><div class="hint">Send a webhook or seed some data to get started</div></div>';
-      return;
-    }
-    let html = `<table><thead><tr><th>Issue</th><th>Classification</th><th>Action</th><th>PR</th><th>Time</th><th></th></tr></thead><tbody>`;
-    for (const iss of items) {
-      const cls = iss.classification || "—";
-      const act = iss.action_taken || "—";
-      const clsTag = tag(cls, cls === "opened_pr" ? "bug" : cls);
-      const clsTitle = iss.explanation ? ` title="${escHtml(iss.explanation).slice(0, 200)}"` : "";
-      const actTag = tag(act.replace("_", " "), act);
-      const prLink = iss.pr_url ? `<a href="${iss.pr_url}" target="_blank">#${iss.pr_url.split("/").pop()}</a>` : "—";
-      const isMock = iss.explanation && iss.explanation.includes("Mock") ? " (mock)" : "";
-      html += `<tr>
-        <td><a href="${iss.url || "#"}" target="_blank" title="${escHtml(iss.body || "").slice(0, 120)}">${escHtml(iss.title).slice(0, 60)}</a>${isMock}<br><span style="font-size:0.75rem;color:var(--text-muted)">#${iss.number} · ${iss.repo}</span></td>
-        <td><span class="label-tag ${cls}"${clsTitle}>${cls}</span></td>
-        <td>${actTag}</td>
-        <td>${prLink}</td>
-        <td style="font-size:0.8rem;color:var(--text-muted)">${fmtDate(iss.decision_created_at || iss.created_at)}</td>
-        <td><button class="btn-reprocess" data-id="${iss.id}" onclick="reprocessIssue(${iss.id})" title="Run agent again">↻</button></td>
-      </tr>`;
-    }
-    html += "</tbody></table>";
-    document.getElementById("issues-table").innerHTML = html;
-  } catch (e) {
-    document.getElementById("issues-table").innerHTML = `<div class="empty"><p>Failed to load issues</p><div class="hint">${e.message}</div></div>`;
-  }
-}
-
-async function reprocessIssue(id) {
-  const btn = document.querySelector(`.btn-reprocess[data-id="${id}"]`);
-  btn.disabled = true;
-  btn.textContent = "⟳";
-  try {
-    const result = await api(`/api/issues/${id}/reprocess`, { method: "POST" });
-    toast("Reprocessed issue #" + id, "success");
-    loadIssues();
-  } catch (e) {
-    btn.textContent = "✗";
-    toast("Reprocess failed: " + e.message, "error");
-    setTimeout(() => { btn.disabled = false; btn.textContent = "↻"; }, 2000);
-  }
+function escHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s || "";
+  return d.innerHTML;
 }
 
 function toast(msg, type) {
@@ -403,15 +654,224 @@ function toast(msg, type) {
   setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity 0.3s"; setTimeout(() => el.remove(), 300); }, 3000);
 }
 
-function escHtml(s) {
-  const d = document.createElement("div");
-  d.textContent = s;
-  return d.innerHTML;
+// ── Health / Sidebar Status ────────────────────────────────────────
+async function loadHealth() {
+  try {
+    const h = await api("/health");
+    const dot = document.getElementById("status-dot");
+    const text = document.getElementById("status-text");
+    const detail = document.getElementById("status-detail");
+    dot.className = "status-dot online";
+    text.textContent = "Online";
+    let info = [];
+    if (h.llm_provider) info.push(h.llm_provider);
+    if (h.llm_model) info.push(h.llm_model.includes("/") ? h.llm_model.split("/").pop() : h.llm_model);
+    if (h.tools_registered > 0) info.push(h.tools_registered + " tools");
+    detail.textContent = info.join(" \u00b7 ");
+    return h;
+  } catch (e) {
+    document.getElementById("status-dot").className = "status-dot offline";
+    document.getElementById("status-text").textContent = "Offline";
+    document.getElementById("status-detail").textContent = "";
+    return null;
+  }
 }
 
-// ── Eval Chart ──────────────────────────────────────────────────
+// ── Stats (Dashboard) ─────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const s = await api("/api/stats");
+    document.getElementById("stat-issues").textContent = s.total_issues ?? 0;
+    document.getElementById("stat-decisions").textContent = s.total_decisions ?? 0;
+    document.getElementById("stat-prs").textContent = s.prs_opened ?? 0;
+    const evalEl = document.getElementById("stat-eval");
+    if (s.latest_eval_score != null) {
+      evalEl.textContent = (s.latest_eval_score * 100).toFixed(0) + "%";
+    } else {
+      evalEl.textContent = "\u2014";
+    }
+    // uptime from health
+    const h = await api("/health");
+    const hrs = (h.uptime_seconds / 3600).toFixed(1);
+    document.getElementById("stat-uptime").textContent = hrs;
+    drawDistributions(s);
+  } catch (e) {
+    document.querySelectorAll(".card .value").forEach(el => el.textContent = "err");
+  }
+}
 
+function drawDistributions(s) {
+  const clsColors = { bug: "#ef4444", feature: "#3b82f6", duplicate: "#a855f7", unclear: "#eab308" };
+  const cls = s.classification_distribution || {};
+  const clsMax = Math.max(...Object.values(cls), 1);
+  let clsHtml = "";
+  for (const [k, v] of Object.entries(cls).sort((a, b) => b[1] - a[1])) {
+    const pct = (v / clsMax * 100).toFixed(0);
+    clsHtml += `<div class="dist-bar"><span class="dist-label">${k}</span><div class="dist-track"><div class="dist-fill" style="width:${pct}%;background:${clsColors[k]||'#6366f1'}"></div></div><span class="dist-count">${v}</span></div>`;
+  }
+  document.getElementById("classification-dist").innerHTML = clsHtml || '<div class="empty"><p>No data</p></div>';
+
+  const actColors = { opened_pr: "#22c55e", commented: "#6366f1", labeled: "#3b82f6", no_action: "#8b8fa5" };
+  const act = s.action_distribution || {};
+  const actMax = Math.max(...Object.values(act), 1);
+  let actHtml = "";
+  for (const [k, v] of Object.entries(act).sort((a, b) => b[1] - a[1])) {
+    const pct = (v / actMax * 100).toFixed(0);
+    actHtml += `<div class="dist-bar"><span class="dist-label">${k.replace("_", " ")}</span><div class="dist-track"><div class="dist-fill" style="width:${pct}%;background:${actColors[k]||'#6366f1'}"></div></div><span class="dist-count">${v}</span></div>`;
+  }
+  document.getElementById("action-dist").innerHTML = actHtml || '<div class="empty"><p>No data</p></div>';
+}
+
+// ── Issues Summary (Dashboard recent activity) ────────────────────
+async function loadIssuesSummary() {
+  try {
+    const data = await api("/api/issues?per_page=5");
+    const items = data.items || [];
+    if (items.length === 0) {
+      document.getElementById("recent-activity").innerHTML = '<div class="empty"><p>No issues yet</p></div>';
+      return;
+    }
+    let html = items.map(iss => {
+      const cls = iss.classification || "unclear";
+      const act = iss.action_taken || "no_action";
+      return `<div class="dist-bar" style="margin:0.35rem 0">
+        <span class="dist-label" style="width:auto;min-width:50px">${tag(cls, cls)}</span>
+        <span style="flex:1;font-size:0.8rem">${escHtml(iss.title).slice(0, 45)}</span>
+        <span style="font-size:0.7rem;color:var(--text-muted)">${fmtDate(iss.decision_created_at)}</span>
+      </div>`;
+    }).join("");
+    document.getElementById("recent-activity").innerHTML = html;
+  } catch (e) {
+    document.getElementById("recent-activity").innerHTML = '<div class="empty"><p>Failed to load</p></div>';
+  }
+}
+
+// ── Issues Table (Issues page) ────────────────────────────────────
+async function loadIssues() {
+  try {
+    const data = await api("/api/issues?per_page=50");
+    window._issuesData = data.items || [];
+    filterIssues();
+  } catch (e) {
+    document.getElementById("issues-table").innerHTML = `<div class="empty"><p>Failed to load issues</p><div class="hint">${e.message}</div></div>`;
+  }
+}
+
+function filterIssues() {
+  const q = (document.getElementById("issues-search").value || "").toLowerCase();
+  const clsFilter = document.getElementById("issues-filter").value;
+  let items = window._issuesData || [];
+  if (clsFilter !== "all") items = items.filter(i => (i.classification || "").toLowerCase() === clsFilter);
+  if (q) items = items.filter(i => (i.title || "").toLowerCase().includes(q) || (i.body || "").toLowerCase().includes(q));
+  if (items.length === 0) {
+    document.getElementById("issues-table").innerHTML = '<div class="empty"><p>No matching issues</p></div>';
+    return;
+  }
+  let html = `<table><thead><tr><th>Issue</th><th>Classification</th><th>Action</th><th>PR</th><th>Time</th><th></th></tr></thead><tbody>`;
+  for (const iss of items) {
+    const cls = iss.classification || "unclear";
+    const act = iss.action_taken || "no_action";
+    const actLabel = act.replace(/_/g, " ");
+    const clsTitle = iss.explanation ? ` title="${escHtml(iss.explanation).slice(0, 200)}"` : "";
+    const prLink = iss.pr_url ? `<a href="${iss.pr_url}" target="_blank">#${iss.pr_url.split("/").pop()}</a>` : "\u2014";
+    const isMock = iss.explanation && iss.explanation.includes("Mock") ? " (mock)" : "";
+    html += `<tr>
+      <td><a href="${iss.url || "#"}" target="_blank" title="${escHtml(iss.body || "").slice(0, 120)}">${escHtml(iss.title).slice(0, 60)}</a>${isMock}<br><span style="font-size:0.75rem;color:var(--text-muted)">#${iss.number} \u00b7 ${iss.repo}</span></td>
+      <td><span class="label-tag ${cls}"${clsTitle}>${cls}</span></td>
+      <td>${tag(actLabel, act)}</td>
+      <td>${prLink}</td>
+      <td style="font-size:0.8rem;color:var(--text-muted)">${fmtDate(iss.decision_created_at || iss.created_at)}</td>
+      <td><button class="btn-icon" data-id="${iss.id}" onclick="reprocessIssue(${iss.id})" title="Run agent again">\u21bb</button></td>
+    </tr>`;
+  }
+  html += "</tbody></table>";
+  document.getElementById("issues-table").innerHTML = html;
+}
+
+async function reprocessIssue(id) {
+  const btn = document.querySelector(`.btn-icon[data-id="${id}"]`);
+  btn.disabled = true;
+  btn.textContent = "\u27f3";
+  try {
+    const result = await api(`/api/issues/${id}/reprocess`, { method: "POST" });
+    toast("Reprocessed issue #" + id, "success");
+    loadIssues();
+  } catch (e) {
+    btn.textContent = "\u2717";
+    toast("Reprocess failed: " + e.message, "error");
+    setTimeout(() => { btn.disabled = false; btn.textContent = "\u21bb"; }, 2000);
+  }
+}
+
+// ── Logs (Logs page) ─────────────────────────────────────────────
+let _logsData = [];
+let _autoScroll = true;
+
+async function loadLogs() {
+  try {
+    const logs = await api("/api/logs?limit=500");
+    _logsData = logs;
+    filterLogs();
+    if (_autoScroll) {
+      const container = document.querySelector("#log-container-inner") || document.getElementById("log-container-inner");
+      if (container) container.scrollTop = container.scrollHeight;
+    }
+  } catch (e) {
+    document.querySelector(".log-container").innerHTML = `<div class="empty"><p>Failed to load logs</p><div class="hint">${e.message}</div></div>`;
+  }
+}
+
+function filterLogs() {
+  const level = document.getElementById("log-level-filter").value;
+  const q = (document.getElementById("log-search").value || "").toLowerCase();
+  let filtered = _logsData;
+  if (level !== "all") filtered = filtered.filter(l => (l.level || "").toLowerCase() === level);
+  if (q) filtered = filtered.filter(l => (l.message || "").toLowerCase().includes(q));
+
+  document.getElementById("log-count").textContent = filtered.length + " entries";
+
+  if (filtered.length === 0) {
+    document.querySelector(".log-container").innerHTML = '<div class="empty"><p>No log entries</p></div>';
+    return;
+  }
+
+  let html = `<div id="log-container-inner">`;
+  for (const entry of filtered) {
+    const level = (entry.level || "info").toLowerCase();
+    const time = entry.time || entry.timestamp || "";
+    const msg = entry.message || "";
+    const badge = entry.badge || "";
+    const badgeHtml = badge ? `<span class="log-badge ${badge}">${badge}</span>` : "";
+    html += `<div class="log-entry">
+      <span class="log-time">${fmtDateTime(time)}</span>
+      <span class="log-level ${level}">${level}</span>
+      <span class="log-msg">${escHtml(msg)} ${badgeHtml}</span>
+    </div>`;
+  }
+  html += "</div>";
+  document.querySelector(".log-container").innerHTML = html;
+
+  if (_autoScroll) {
+    const container = document.querySelector("#log-container-inner");
+    if (container) container.scrollTop = container.scrollHeight;
+  }
+}
+
+function toggleAutoScroll() {
+  _autoScroll = !_autoScroll;
+  const btn = document.getElementById("log-auto-scroll-btn");
+  btn.textContent = _autoScroll ? "Auto-scroll ON" : "Auto-scroll OFF";
+  btn.className = _autoScroll ? "btn btn-sm btn-primary" : "btn btn-sm";
+}
+
+function clearLogs() {
+  _logsData = [];
+  document.querySelector(".log-container").innerHTML = '<div class="empty"><p>Logs cleared</p></div>';
+}
+
+// ── Eval Chart ────────────────────────────────────────────────────
 let evalChart = null;
+let evalChart2 = null;
 
 async function loadEvalRuns() {
   try {
@@ -419,131 +879,180 @@ async function loadEvalRuns() {
     document.getElementById("eval-count").textContent = runs.length + " runs";
     const labels = runs.map(r => fmtDate(r.created_at)).reverse();
     const scores = runs.map(r => r.overall_score != null ? r.overall_score * 100 : null).reverse();
-
     if (runs.length === 0) {
-      document.querySelector(".chart-container").innerHTML = '<div class="empty"><p>No eval runs yet</p></div>';
+      document.querySelector("#page-dashboard .chart-container").innerHTML = '<div class="empty"><p>No eval runs yet</p></div>';
       return;
     }
-
-    const ctx = document.getElementById("eval-chart").getContext("2d");
-    if (evalChart) evalChart.destroy();
-
-    evalChart = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [{
-          label: "Overall Score",
-          data: scores,
-          borderColor: "#6366f1",
-          backgroundColor: "rgba(99,102,241,0.1)",
-          fill: true,
-          tension: 0.3,
-          pointRadius: 4,
-          pointBackgroundColor: "#6366f1",
-          pointBorderColor: "#1a1d27",
-          pointBorderWidth: 2,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: "#232738",
-            titleColor: "#e1e5ee",
-            bodyColor: "#8b8fa5",
-            borderColor: "#2a2e3f",
-            borderWidth: 1,
-            cornerRadius: 6,
-            callbacks: {
-              label: ctx => ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) + "%" : "",
-            },
-          },
-        },
-        scales: {
-          x: {
-            ticks: { color: "#8b8fa5", maxTicksLimit: 8, font: { size: 10 } },
-            grid: { color: "rgba(42,46,63,0.5)" },
-          },
-          y: {
-            min: 0,
-            max: 100,
-            ticks: { color: "#8b8fa5", callback: v => v + "%", font: { size: 10 } },
-            grid: { color: "rgba(42,46,63,0.5)" },
-          },
-        },
-      },
-    });
+    drawEvalChart("eval-chart", labels, scores);
   } catch (e) {
-    document.querySelector(".chart-container").innerHTML = `<div class="empty"><p>Failed to load eval data</p></div>`;
+    // skip
   }
 }
 
-// ── Quick Actions ───────────────────────────────────────────────
+async function loadEvalRuns2() {
+  try {
+    const runs = await api("/api/eval/runs?limit=30");
+    document.getElementById("eval-count-2").textContent = runs.length + " runs";
+    const labels = runs.map(r => fmtDate(r.created_at)).reverse();
+    const scores = runs.map(r => r.overall_score != null ? r.overall_score * 100 : null).reverse();
+    drawEvalChart("eval-chart-2", labels, scores);
 
+    // table
+    if (runs.length === 0) {
+      document.getElementById("eval-runs-table").innerHTML = '<div class="empty"><p>No eval runs</p></div>';
+      return;
+    }
+    let html = `<table><thead><tr><th>Run ID</th><th>Score</th><th>Class. Acc</th><th>Action Acc</th><th>Cases</th><th>Failures</th><th>Time</th></tr></thead><tbody>`;
+    for (const r of runs) {
+      html += `<tr>
+        <td style="font-family:monospace;font-size:0.75rem">${escHtml(r.run_id).slice(0, 12)}</td>
+        <td><strong>${r.overall_score != null ? (r.overall_score * 100).toFixed(1) + "%" : "\u2014"}</strong></td>
+        <td>${r.classification_accuracy != null ? (r.classification_accuracy * 100).toFixed(1) + "%" : "\u2014"}</td>
+        <td>${r.action_accuracy != null ? (r.action_accuracy * 100).toFixed(1) + "%" : "\u2014"}</td>
+        <td>${r.total_cases ?? "\u2014"}</td>
+        <td style="color:${r.failures > 0 ? 'var(--red)' : 'var(--green)'}">${r.failures ?? 0}</td>
+        <td style="font-size:0.75rem;color:var(--text-muted)">${fmtDate(r.created_at)}</td>
+      </tr>`;
+    }
+    html += "</tbody></table>";
+    document.getElementById("eval-runs-table").innerHTML = html;
+  } catch (e) {
+    document.getElementById("eval-runs-table").innerHTML = `<div class="empty"><p>Failed to load</p></div>`;
+  }
+}
+
+function drawEvalChart(canvasId, labels, scores) {
+  const ctx = document.getElementById(canvasId).getContext("2d");
+  if (canvasId === "eval-chart" && evalChart) evalChart.destroy();
+  if (canvasId === "eval-chart-2" && evalChart2) evalChart2.destroy();
+  const chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Overall Score",
+        data: scores,
+        borderColor: "#6366f1",
+        backgroundColor: "rgba(99,102,241,0.1)",
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointBackgroundColor: "#6366f1",
+        pointBorderColor: "#1a1d27",
+        pointBorderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#232738",
+          titleColor: "#e1e5ee",
+          bodyColor: "#8b8fa5",
+          borderColor: "#2a2e3f",
+          borderWidth: 1,
+          cornerRadius: 6,
+          callbacks: { label: ctx => ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) + "%" : "" },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: "#8b8fa5", maxTicksLimit: 8, font: { size: 10 } },
+          grid: { color: "rgba(42,46,63,0.5)" },
+        },
+        y: {
+          min: 0, max: 100,
+          ticks: { color: "#8b8fa5", callback: v => v + "%", font: { size: 10 } },
+          grid: { color: "rgba(42,46,63,0.5)" },
+        },
+      },
+    },
+  });
+  if (canvasId === "eval-chart") evalChart = chart;
+  else evalChart2 = chart;
+}
+
+// ── Run Eval ──────────────────────────────────────────────────────
 async function runEval() {
-  const btn = document.querySelector("button");
+  const btn = document.querySelector("#page-evaluations .btn-primary");
+  const running = document.getElementById("eval-running");
   const result = document.getElementById("eval-result");
   btn.disabled = true;
-  btn.textContent = "Running...";
-  result.textContent = "";
+  running.style.display = "inline";
+  result.innerHTML = "";
   try {
-    const r = await fetch("/api/eval/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
-    const data = await r.json();
-    result.innerHTML = `Score: <strong>${(data.overall_score * 100).toFixed(1)}%</strong> · ${data.total_cases} cases · ${data.failures} failures`;
+    const data = await fetch("/api/eval/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).then(r => r.json());
+    result.innerHTML = `<div style="display:flex;gap:1rem;flex-wrap:wrap">
+      <div class="card" style="flex:1"><div class="label">Overall Score</div><div class="value purple">${(data.overall_score * 100).toFixed(1)}%</div></div>
+      <div class="card" style="flex:1"><div class="label">Classification Acc</div><div class="value blue">${(data.classification_accuracy * 100).toFixed(1)}%</div></div>
+      <div class="card" style="flex:1"><div class="label">Action Acc</div><div class="value green">${(data.action_accuracy * 100).toFixed(1)}%</div></div>
+      <div class="card" style="flex:1"><div class="label">Cases / Failures</div><div class="value accent">${data.total_cases}<span style="font-size:1rem;color:var(--text-muted)"> / </span><span style="color:${data.failures > 0 ? 'var(--red)' : 'var(--green)'}">${data.failures}</span></div></div>
+    </div>`;
+    toast("Evaluation complete", "success");
+    loadEvalRuns2();
     loadEvalRuns();
-    loadStats();
   } catch (e) {
-    result.textContent = "Error: " + e.message;
+    result.innerHTML = `<div style="color:var(--red);font-size:0.85rem">Error: ${escHtml(e.message)}</div>`;
+    toast("Eval failed: " + e.message, "error");
   }
   btn.disabled = false;
-  btn.textContent = "Run Evaluation Suite";
+  running.style.display = "none";
 }
 
-// ── Header Status ───────────────────────────────────────────────
-
-async function loadHealth() {
+// ── Settings ──────────────────────────────────────────────────────
+async function loadSettings() {
   try {
     const h = await api("/health");
-    let label = "live";
-    if (h.llm_provider && h.llm_model) {
-      label = h.llm_provider + " · " + (h.llm_model.includes("/") ? h.llm_model.split("/").pop() : h.llm_model);
-      if (h.tools_registered > 0) label += " · " + h.tools_registered + " tools";
-    }
-    document.getElementById("header-status").textContent = label;
-    document.getElementById("header-status").style.color = "var(--green)";
+    let llmHtml = `<div class="settings-row"><div><div class="label">Provider</div><div class="desc">LLM provider in use</div></div><div class="value">${escHtml(h.llm_provider || "Not configured")}</div></div>
+      <div class="settings-row"><div><div class="label">Model</div><div class="desc">Active model</div></div><div class="value">${escHtml(h.llm_model || "\u2014")}</div></div>`;
+    document.getElementById("settings-llm").innerHTML = llmHtml;
+
+    let sysHtml = `<div class="settings-row"><div><div class="label">Uptime</div><div class="desc">Server running time</div></div><div class="value">${(h.uptime_seconds / 3600).toFixed(1)} hours</div></div>
+      <div class="settings-row"><div><div class="label">Version</div><div class="desc">API version</div></div><div class="value">v${escHtml(h.version || "0.1.0")}</div></div>`;
+    document.getElementById("settings-system").innerHTML = sysHtml;
+
+    let toolsHtml = `<div class="settings-row"><div><div class="label">Registered Tools</div><div class="desc">Tool handlers available to the agent</div></div><div class="value">${h.tools_registered ?? 0}</div></div>`;
+    document.getElementById("settings-tools").innerHTML = toolsHtml;
   } catch (e) {
-    document.getElementById("header-status").textContent = "offline";
-    document.getElementById("header-status").style.color = "var(--red)";
+    document.querySelectorAll("#settings-llm, #settings-system, #settings-tools").forEach(el => {
+      el.innerHTML = `<div class="empty"><p>Failed to load settings</p></div>`;
+    });
   }
 }
 
-// ── Init ────────────────────────────────────────────────────────
+// ── Polling for logs (auto-refresh on logs page) ───────────────────
+setInterval(() => {
+  const logsPage = document.getElementById("page-logs");
+  if (logsPage && logsPage.classList.contains("active")) {
+    loadLogs();
+  }
+}, 5000);
 
+setInterval(() => {
+  const dashPage = document.getElementById("page-dashboard");
+  if (dashPage && dashPage.classList.contains("active")) {
+    loadStats();
+    loadIssuesSummary();
+  }
+}, 15000);
+
+// ── SSE ──────────────────────────────────────────────────────────────
+function connectSSE() {
+  const es = new EventSource("/api/events");
+  es.addEventListener("issue", () => { loadStats(); loadIssuesSummary(); });
+  es.addEventListener("eval", () => { loadStats(); loadEvalRuns(); });
+  es.onerror = () => { es.close(); setTimeout(connectSSE, 5000); };
+}
+
+// ── Init ──────────────────────────────────────────────────────────
 async function init() {
   await loadHealth();
-  await Promise.all([loadStats(), loadIssues(), loadEvalRuns()]);
+  await Promise.all([loadStats(), loadIssuesSummary(), loadEvalRuns()]);
   connectSSE();
 }
 init();
-
-// Fallback polling (every 30s)
-setInterval(() => { loadStats(); loadIssues(); }, 30000);
-
-// ── Real-time via SSE ───────────────────────────────────────────
-
-function connectSSE() {
-  const es = new EventSource("/api/events");
-  es.addEventListener("issue", () => { loadStats(); loadIssues(); });
-  es.addEventListener("eval", () => { loadStats(); loadEvalRuns(); });
-  es.onerror = () => {
-    // SSE connection lost — polling fallback handles it
-    es.close();
-    setTimeout(connectSSE, 5000);
-  };
-}
 </script>
 </body>
 </html>
