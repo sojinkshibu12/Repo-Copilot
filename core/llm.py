@@ -279,6 +279,7 @@ def _openai_convert_messages(messages: list[dict]) -> list[dict]:
             for tc in content["tool_calls"]:
                 openai_tc.append({
                     "id": tc["id"],
+                    "type": "function",
                     "function": {
                         "name": tc["name"],
                         "arguments": json.dumps(tc["input"]),
