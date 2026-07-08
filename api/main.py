@@ -182,21 +182,23 @@ def _get_repo():
 
 @app.get("/api/repo/branches", tags=["Repository"])
 async def list_branches():
-    """List all local branches with latest commit info."""
+    """List all branches from GitHub API."""
     try:
-        repo = _get_repo()
+        from core.github import GitHubClient
+        gh = GitHubClient()
+        pygh_repo = gh.get_repo()
         branches = []
-        for b in repo.branches:
-            commit = b.commit
+        default = pygh_repo.default_branch
+        for b in pygh_repo.get_branches():
             branches.append({
                 "name": b.name,
-                "is_head": b.name == repo.active_branch.name,
-                "commit_sha": commit.hexsha[:8],
-                "commit_message": commit.message.strip().split("\n")[0],
-                "commit_author": str(commit.author),
-                "commit_time": datetime.utcfromtimestamp(commit.committed_date).isoformat() + "Z",
+                "is_head": b.name == default,
+                "commit_sha": b.commit.sha[:8],
+                "commit_message": b.commit.commit.message.strip().split("\n")[0],
+                "commit_author": b.commit.commit.author.name or str(b.commit.commit.author),
+                "commit_time": b.commit.commit.author.date.isoformat() + "Z" if b.commit.commit.author.date else None,
             })
-        return sorted(branches, key=lambda x: x["commit_time"], reverse=True)
+        return sorted(branches, key=lambda x: (not x["is_head"], x["name"]))
     except Exception as e:
         logger.error("Failed to list branches: %s", e)
         return []
@@ -208,24 +210,26 @@ async def list_commits(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
 ):
-    """List commits with pagination."""
+    """List commits from GitHub API with pagination."""
     try:
-        repo = _get_repo()
-        head = branch or repo.active_branch.name
-        commits = list(repo.iter_commits(head, max_count=page * per_page))
+        from core.github import GitHubClient
+        gh = GitHubClient()
+        pygh_repo = gh.get_repo()
+        sha = branch or pygh_repo.default_branch
+        commits = list(pygh_repo.get_commits(sha=sha)[:page * per_page])
         start = (page - 1) * per_page
         items = commits[start:start + per_page]
         result = []
         for c in items:
             result.append({
-                "sha": c.hex[:8],
-                "full_sha": c.hex,
-                "message": c.message.strip().split("\n")[0],
-                "body": "\n".join(c.message.strip().split("\n")[1:]).strip(),
-                "author": str(c.author),
-                "email": str(c.author.email) if hasattr(c.author, "email") else "",
-                "time": datetime.utcfromtimestamp(c.committed_date).isoformat() + "Z",
-                "files_changed": len(c.stats.files) if c.stats else 0,
+                "sha": c.sha[:8],
+                "full_sha": c.sha,
+                "message": c.commit.message.strip().split("\n")[0],
+                "body": "\n".join(c.commit.message.strip().split("\n")[1:]).strip(),
+                "author": c.commit.author.name or str(c.commit.author),
+                "email": c.commit.author.email or "",
+                "time": c.commit.author.date.isoformat() + "Z" if c.commit.author.date else None,
+                "files_changed": len(c.files) if c.files else 0,
             })
         return {"items": result, "total": len(commits), "page": page, "per_page": per_page}
     except Exception as e:

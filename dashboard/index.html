@@ -286,15 +286,21 @@
         <div class="panel-header"><h2>Branch Tree</h2><span class="count" id="branch-count">0 branches</span></div>
         <div class="panel-body"><div id="branch-tree"><div class="loading"><div class="spinner"></div></div></div></div>
       </div>
-      <div class="panel">
-        <div class="panel-header"><h2>Recent Commits</h2><span class="count" id="commit-count">0</span></div>
-        <div class="panel-body"><div id="commit-preview"><div class="loading"><div class="spinner"></div></div></div></div>
-        <div class="show-more"><button class="btn-link" onclick="navigate('commits-prs')">View All Commits &rarr;</button></div>
-      </div>
-      <div class="panel">
-        <div class="panel-header"><h2>Open Pull Requests</h2><span class="count" id="pr-count">0</span></div>
-        <div class="panel-body"><div id="pr-preview"><div class="loading"><div class="spinner"></div></div></div></div>
-        <div class="show-more"><button class="btn-link" onclick="navigate('commits-prs')">View All PRs &rarr;</button></div>
+      <div class="grid-2">
+        <div>
+          <div class="panel">
+            <div class="panel-header"><h2>Recent Commits</h2><span class="count" id="commit-count">0</span></div>
+            <div class="panel-body"><div id="commit-preview"><div class="loading"><div class="spinner"></div></div></div></div>
+            <div class="show-more"><button class="btn-link" onclick="navigate('commits-prs')">View All &rarr;</button></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="panel-header"><h2>Open Pull Requests</h2><span class="count" id="pr-count">0</span></div>
+            <div class="panel-body"><div id="pr-preview"><div class="loading"><div class="spinner"></div></div></div></div>
+            <div class="show-more"><button class="btn-link" onclick="navigate('commits-prs')">View All &rarr;</button></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -606,23 +612,21 @@ async function loadRepository() {
       api("/api/repo/pulls?state=open&per_page=10"),
     ]);
     document.getElementById("branch-count").textContent = branches.length + " branches";
-    document.getElementById("commit-count").textContent = commitsData.total || 0;
+    document.getElementById("commit-count").textContent = (commitsData.items||[]).length;
     document.getElementById("pr-count").textContent = (prsData.items||[]).length;
 
-    // ── Branch Tree (hierarchical) ──
-    if (branches.length === 0) { document.getElementById("branch-tree").innerHTML = '<div class="empty"><p>No branches found</p><div class="hint">REPO_LOCAL_PATH may not point to a valid git repo</div></div>'; }
+    // ── Branch Tree ──
+    if (branches.length === 0) { document.getElementById("branch-tree").innerHTML = '<div class="empty"><p>No branches found</p></div>'; }
     else {
       let treeHtml = '<div style="font-family:monospace;font-size:0.85rem">';
-      // Find default branch (main/master)
-      const defaultBranch = branches.find(b => b.name === "main" || b.name === "master") || branches[0];
-      const others = branches.filter(b => b.name !== defaultBranch.name);
+      const defaultBranch = branches.find(b => b.is_head) || branches[0];
+      const others = branches.filter(b => !b.is_head);
       treeHtml += `<div style="padding:0.25rem 0">
         <div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.5rem;background:var(--surface-2);border-radius:6px;margin-bottom:0.25rem">
           <span style="color:var(--green)">&#9670;</span>
           <span style="font-weight:600">${escHtml(defaultBranch.name)}</span>
           <span style="font-size:0.7rem;color:var(--text-muted)">${escHtml(defaultBranch.commit_sha)} ${escHtml(defaultBranch.commit_message).slice(0,35)}</span>
         </div>`;
-      // Child branches (branches that diverged from main)
       if (others.length > 0) {
         treeHtml += `<div style="padding-left:1.5rem;border-left:2px solid var(--border);margin-left:0.6rem">`;
         for (const b of others) {
@@ -639,7 +643,7 @@ async function loadRepository() {
       document.getElementById("branch-tree").innerHTML = treeHtml;
     }
 
-    // ── Commits (flat tree) ──
+    // ── Commits ──
     const commits = commitsData.items || [];
     if (commits.length === 0) { document.getElementById("commit-preview").innerHTML = '<div class="empty"><p>No commits</p></div>'; }
     else {
@@ -672,7 +676,7 @@ async function loadRepository() {
 
     // Populate branch filter
     const sel = document.getElementById("commit-branch-filter");
-    sel.innerHTML = branches.map(b => `<option value="${escHtml(b.name)}"${b.is_head?' selected':''}>${escHtml(b.name)}</option>`).join("");
+    if (sel) sel.innerHTML = branches.map(b => `<option value="${escHtml(b.name)}"${b.is_head?' selected':''}>${escHtml(b.name)}</option>`).join("");
   } catch (e) { toast("Failed to load repository: " + e.message, "error"); }
 }
 
