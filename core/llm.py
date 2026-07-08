@@ -555,11 +555,19 @@ class _DeepSeekProvider(BaseProvider):
             body["tools"] = _openai_tools(tools)
 
         response = client.chat.completions.create(**body)
+        if not response.choices:
+            logger.error("OpenRouter returned no choices: %s", response)
+            return LLMResponse(
+                content="I could not process this request.",
+                usage={"input_tokens": 0, "output_tokens": 0},
+                finish_reason="error",
+                model=model,
+            )
         choice = response.choices[0]
-        msg = choice.message
+        msg = choice.message if choice else None
 
         tool_calls = []
-        if msg.tool_calls:
+        if msg and msg.tool_calls:
             for tc in msg.tool_calls:
                 args = {}
                 try:
@@ -570,13 +578,13 @@ class _DeepSeekProvider(BaseProvider):
 
         usage = response.usage
         return LLMResponse(
-            content=msg.content or None,
+            content=msg.content if msg else None,
             tool_calls=tool_calls,
             usage={
                 "input_tokens": usage.prompt_tokens if usage else 0,
                 "output_tokens": usage.completion_tokens if usage else 0,
             },
-            finish_reason=choice.finish_reason or "",
+            finish_reason=choice.finish_reason if choice else "error",
             model=model,
         )
 
