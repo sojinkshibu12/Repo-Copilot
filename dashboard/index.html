@@ -280,27 +280,11 @@
 
   <!-- ==================== REPOSITORY ==================== -->
   <div class="page" id="page-repository">
-    <div class="page-header"><h1>Repository</h1><p>Git branch tree, recent commits, and open pull requests</p></div>
+    <div class="page-header"><h1>Repository</h1><p>Git branch tree</p></div>
     <div class="page-content">
       <div class="panel">
         <div class="panel-header"><h2>Branch Tree</h2><span class="count" id="branch-count">0 branches</span></div>
         <div class="panel-body"><div id="branch-tree"><div class="loading"><div class="spinner"></div></div></div></div>
-      </div>
-      <div class="grid-2">
-        <div>
-          <div class="panel">
-            <div class="panel-header"><h2>Recent Commits</h2><span class="count" id="commit-count">0</span></div>
-            <div class="panel-body"><div id="commit-preview"><div class="loading"><div class="spinner"></div></div></div></div>
-            <div class="show-more"><button class="btn-link" onclick="navigate('commits-prs')">View All &rarr;</button></div>
-          </div>
-        </div>
-        <div>
-          <div class="panel">
-            <div class="panel-header"><h2>Open Pull Requests</h2><span class="count" id="pr-count">0</span></div>
-            <div class="panel-body"><div id="pr-preview"><div class="loading"><div class="spinner"></div></div></div></div>
-            <div class="show-more"><button class="btn-link" onclick="navigate('commits-prs')">View All &rarr;</button></div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -606,16 +590,9 @@ function clearLogs() { _logsData = []; document.querySelector(".log-container").
 // ── Repository Page ───────────────────────────────────────
 async function loadRepository() {
   try {
-    const [branches, commitsData, prsData] = await Promise.all([
-      api("/api/repo/branches"),
-      api("/api/repo/commits?per_page=10"),
-      api("/api/repo/pulls?state=open&per_page=10"),
-    ]);
+    const branches = await api("/api/repo/branches");
     document.getElementById("branch-count").textContent = branches.length + " branches";
-    document.getElementById("commit-count").textContent = (commitsData.items||[]).length;
-    document.getElementById("pr-count").textContent = (prsData.items||[]).length;
 
-    // ── Branch Tree ──
     if (branches.length === 0) { document.getElementById("branch-tree").innerHTML = '<div class="empty"><p>No branches found</p></div>'; }
     else {
       let treeHtml = '<div style="font-family:monospace;font-size:0.85rem">';
@@ -643,38 +620,6 @@ async function loadRepository() {
       document.getElementById("branch-tree").innerHTML = treeHtml;
     }
 
-    // ── Commits ──
-    const commits = commitsData.items || [];
-    if (commits.length === 0) { document.getElementById("commit-preview").innerHTML = '<div class="empty"><p>No commits</p></div>'; }
-    else {
-      document.getElementById("commit-preview").innerHTML = '<div style="font-family:monospace;font-size:0.8rem">' +
-        commits.map((c, i) => `<div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.4rem 0;border-bottom:${i<commits.length-1?'1px solid var(--border)':'none'}">
-          <div style="display:flex;flex-direction:column;align-items:center;min-width:20px">
-            <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);margin-top:0.3rem"></div>
-            ${i < commits.length - 1 ? '<div style="width:2px;flex:1;background:var(--border);margin:0.2rem 0"></div>' : ''}
-          </div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:500;font-size:0.85rem">${escHtml(c.message).slice(0,60)}</div>
-            <div style="font-size:0.7rem;color:var(--text-muted)">${escHtml(c.sha)} &middot; ${escHtml(c.author)} &middot; ${fmtDate(c.time)}</div>
-          </div>
-        </div>`).join('') + '</div>';
-    }
-
-    // ── PRs ──
-    const prs = prsData.items || [];
-    if (prs.length === 0) { document.getElementById("pr-preview").innerHTML = '<div class="empty"><p>No open pull requests</p></div>'; }
-    else {
-      document.getElementById("pr-preview").innerHTML = '<div>' +
-        prs.map(p => `<div class="pr-node">
-          <div class="pr-icon open">&#10095;</div>
-          <div class="pr-info">
-            <div class="pr-title"><a href="${escHtml(p.url)}" target="_blank">${escHtml(p.title)}</a>${p.draft ? ' <span style="font-size:0.65rem;color:var(--yellow)">DRAFT</span>' : ''}</div>
-            <div class="pr-meta">#${p.number} &middot; ${escHtml(p.head)} \u2192 ${escHtml(p.base)} &middot; ${escHtml(p.author)} &middot; ${fmtDate(p.created_at)}</div>
-          </div>
-        </div>`).join('') + '</div>';
-    }
-
-    // Populate branch filter
     const sel = document.getElementById("commit-branch-filter");
     if (sel) sel.innerHTML = branches.map(b => `<option value="${escHtml(b.name)}"${b.is_head?' selected':''}>${escHtml(b.name)}</option>`).join("");
   } catch (e) { toast("Failed to load repository: " + e.message, "error"); }
