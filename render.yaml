@@ -17,9 +17,9 @@ services:
       - key: TRACE_EMITTER
         value: json
       - key: LLM_PROVIDER
-        value: deepseek
+        value: openrouter
       - key: LLM_MODEL
-        value: deepseek-v4-flash
+        value: tencent/hy3-preview:free
       - key: EMBEDDING_PROVIDER
         value: google
       - key: LOG_LEVEL
@@ -38,7 +38,7 @@ services:
         sync: false
       - key: GOOGLE_API_KEY
         sync: false
-      - key: DEEPSEEK_API_KEY
+      - key: OPENROUTER_API_KEY
         sync: false
 
 databases:

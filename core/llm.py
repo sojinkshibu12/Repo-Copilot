@@ -51,6 +51,7 @@ _SUPPORTED_MODELS: dict[str, tuple[str, str]] = {
     "openrouter/o1": ("openrouter", "o1"),
     "openrouter/claude-sonnet": ("openrouter", "anthropic/claude-sonnet-4"),
     "openrouter/gpt-4o": ("openrouter", "openai/gpt-4o"),
+    "tencent/hy3-preview:free": ("openrouter", "tencent/hy3-preview:free"),
     "ollama/llama3": ("ollama", "llama3"),
     "ollama/mistral": ("ollama", "mistral"),
     "ollama/qwen2.5-coder": ("ollama", "qwen2.5-coder:7b"),
