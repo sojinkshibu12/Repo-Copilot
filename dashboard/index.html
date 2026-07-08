@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Repo Copilot</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <style>
   :root {
     --bg: #0f1117;
@@ -280,11 +281,28 @@
 
   <!-- ==================== REPOSITORY ==================== -->
   <div class="page" id="page-repository">
-    <div class="page-header"><h1>Repository</h1><p>Git branch tree</p></div>
+    <div class="page-header"><h1>Repository</h1><p>Visualized Git branch network — click nodes for details</p></div>
     <div class="page-content">
       <div class="panel">
-        <div class="panel-header"><h2>Branch Tree</h2><span class="count" id="branch-count">0 branches</span></div>
-        <div class="panel-body"><div id="branch-tree"><div class="loading"><div class="spinner"></div></div></div></div>
+        <div class="panel-header">
+          <h2>Repository Graph</h2>
+          <div style="display:flex;gap:0.75rem;align-items:center">
+            <span class="count" id="branch-count">0 branches</span>
+            <span class="count" id="commit-count-2">0 commits</span>
+            <button class="btn btn-sm" onclick="drawRepoGraph()">Refresh</button>
+            <button class="btn btn-sm" onclick="zoomRepo('reset')">Fit</button>
+          </div>
+        </div>
+        <div class="panel-body" style="position:relative">
+          <div id="repo-graph" class="repo-graph" style="min-height:450px"><div class="loading"><div class="spinner"></div> Building graph...</div></div>
+          <div id="graph-tooltip" class="graph-tooltip"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;font-size:0.75rem;color:var(--text-muted);padding:0 0.25rem">
+        <span><span style="color:var(--accent);font-weight:700">&#9473;</span> Default branch</span>
+        <span><span style="color:var(--green);font-weight:700">- - -</span> Feature branch</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);vertical-align:middle"></span> Commit</span>
+        <span><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--green);vertical-align:middle"></span> Branch head</span>
       </div>
     </div>
   </div>
@@ -398,7 +416,7 @@ function navigate(page) {
   const loads = {
     issues: () => loadIssues(),
     logs: () => loadLogs(),
-    repository: () => loadRepository(),
+    repository: () => drawRepoGraph(),
     activity: () => loadActivity(),
     "commits-prs": () => { loadCommits(); loadPRs(); },
     evaluations: () => { loadEvalRuns(); loadEvalRuns2(); },
@@ -587,43 +605,185 @@ function toggleAutoScroll() {
 }
 function clearLogs() { _logsData = []; document.querySelector(".log-container").innerHTML = '<div class="empty"><p>Logs cleared</p></div>'; }
 
-// ── Repository Page ───────────────────────────────────────
-async function loadRepository() {
-  try {
-    const branches = await api("/api/repo/branches");
-    document.getElementById("branch-count").textContent = branches.length + " branches";
+// ── Repository Page (D3 Force Graph) ────────────────────
+let _repoSimulation = null;
+let _repoZoom = null;
 
-    if (branches.length === 0) { document.getElementById("branch-tree").innerHTML = '<div class="empty"><p>No branches found</p></div>'; }
-    else {
-      let treeHtml = '<div style="font-family:monospace;font-size:0.85rem">';
-      const defaultBranch = branches.find(b => b.is_head) || branches[0];
-      const others = branches.filter(b => !b.is_head);
-      treeHtml += `<div style="padding:0.25rem 0">
-        <div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.5rem;background:var(--surface-2);border-radius:6px;margin-bottom:0.25rem">
-          <span style="color:var(--green)">&#9670;</span>
-          <span style="font-weight:600">${escHtml(defaultBranch.name)}</span>
-          <span style="font-size:0.7rem;color:var(--text-muted)">${escHtml(defaultBranch.commit_sha)} ${escHtml(defaultBranch.commit_message).slice(0,35)}</span>
-        </div>`;
-      if (others.length > 0) {
-        treeHtml += `<div style="padding-left:1.5rem;border-left:2px solid var(--border);margin-left:0.6rem">`;
-        for (const b of others) {
-          treeHtml += `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0.5rem;margin:0.15rem 0;border-radius:4px">
-            <span style="color:var(--accent)">&#9492;</span>
-            <span style="font-weight:500">${escHtml(b.name)}</span>
-            <span style="font-size:0.7rem;color:var(--text-muted)">${escHtml(b.commit_sha)} ${escHtml(b.commit_message).slice(0,30)}</span>
-            <span style="font-size:0.65rem;color:var(--text-muted);margin-left:auto">${escHtml(b.commit_author)}</span>
-          </div>`;
-        }
-        treeHtml += `</div>`;
-      }
-      treeHtml += '</div>';
-      document.getElementById("branch-tree").innerHTML = treeHtml;
+async function drawRepoGraph() {
+  const container = document.getElementById("repo-graph");
+  const tooltip = document.getElementById("graph-tooltip");
+  container.innerHTML = '<div class="loading"><div class="spinner"></div> Building graph...</div>';
+  if (_repoSimulation) { _repoSimulation.stop(); _repoSimulation = null; }
+
+  try {
+    const data = await api("/api/repo/network");
+    const branches = data.branches || [];
+    const commits = data.commits || [];
+
+    document.getElementById("branch-count").textContent = branches.length + " branches";
+    document.getElementById("commit-count-2").textContent = commits.length + " commits";
+
+    if (commits.length === 0) {
+      container.innerHTML = '<div class="empty"><p>No commit data available</p></div>';
+      return;
     }
 
-    const sel = document.getElementById("commit-branch-filter");
-    if (sel) sel.innerHTML = branches.map(b => `<option value="${escHtml(b.name)}"${b.is_head?' selected':''}>${escHtml(b.name)}</option>`).join("");
-  } catch (e) { toast("Failed to load repository: " + e.message, "error"); }
+    // Build node/edge lists for D3
+    const branchColors = {};
+    const defaultBranch = branches.find(b => b.is_default);
+    const colorScale = d3.scaleOrdinal(d3.schemeSet2);
+    branches.forEach((b, i) => {
+      branchColors[b.name] = b.is_default ? "#6366f1" : colorScale(i);
+    });
+
+    const commitSet = new Set(commits.map(c => c.sha));
+    const nodes = commits.map(c => ({
+      id: c.sha,
+      full_sha: c.full_sha,
+      message: c.message,
+      author: c.author,
+      time: c.time,
+      branches: c.branches || [],
+      parents: c.parents || [],
+    }));
+
+    const links = [];
+    for (const c of commits) {
+      for (const p of c.parents) {
+        if (commitSet.has(p)) {
+          const isDefault = c.branches && c.branches.some(b => {
+            const br = branches.find(x => x.name === b);
+            return br && br.is_default;
+          });
+          links.push({
+            source: c.sha,
+            target: p,
+            isDefault: !!isDefault,
+          });
+        }
+      }
+    }
+
+    container.innerHTML = '<svg width="100%" height="500"></svg>';
+    const svg = d3.select(container).select("svg");
+    const width = container.clientWidth || 800;
+    const height = 500;
+
+    // Zoom
+    const g = svg.append("g");
+    _repoZoom = d3.zoom().scaleExtent([0.3, 3]).on("zoom", (event) => {
+      g.attr("transform", event.transform);
+    });
+    svg.call(_repoZoom);
+
+    // Simulation
+    _repoSimulation = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id(d => d.id).distance(80))
+      .force("charge", d3.forceManyBody().strength(-200))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("x", d3.forceX(width / 2).strength(0.05))
+      .force("y", d3.forceY(height / 2).strength(0.05));
+
+    // Link defs
+    const link = g.append("g")
+      .selectAll("line")
+      .data(links)
+      .join("line")
+      .attr("stroke", d => d.label ? "#6366f1" : "#2a2e3f")
+      .attr("stroke-width", d => d.label ? 2.5 : 1.5)
+      .attr("stroke-dasharray", d => d.label ? null : "4,3")
+      .attr("opacity", 0.6);
+
+    // Node groups
+    const node = g.append("g")
+      .selectAll("g")
+      .data(nodes)
+      .join("g")
+      .attr("cursor", "pointer")
+      .call(d3.drag()
+        .on("start", (event, d) => { if (!event.active) _repoSimulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+        .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
+        .on("end", (event, d) => { if (!event.active) _repoSimulation.alphaTarget(0); d.fx = null; d.fy = null; })
+      );
+
+    node.append("circle")
+      .attr("r", d => (d.branches && d.branches.length > 0) ? 7 : 5)
+      .attr("fill", d => {
+        if (d.branches && d.branches.length > 0) {
+          const bname = d.branches[0];
+          const br = branches.find(x => x.name === bname);
+          return br && br.is_default ? "#6366f1" : "#22c55e";
+        }
+        return "#6366f1";
+      })
+      .attr("stroke", "#1a1d27")
+      .attr("stroke-width", 2);
+
+    node.append("text")
+      .text(d => d.label || d.id.slice(0, 6))
+      .attr("x", 10)
+      .attr("y", 4)
+      .attr("class", "node-label");
+
+    // Branch labels
+    const branchLabels = {};
+    for (const b of branches) {
+      if (b.sha && !branchLabels[b.sha]) branchLabels[b.sha] = [];
+      if (b.sha) branchLabels[b.sha].push(b.name);
+    }
+
+    // Tooltip
+    node.on("mouseenter", (event, d) => {
+      const bnames = branchLabels[d.id];
+      tooltip.innerHTML = `
+        <div style="font-weight:600;font-family:monospace;font-size:0.8rem">${escHtml(d.id)}</div>
+        <div style="margin-top:0.25rem">${escHtml(d.message).slice(0,80)}</div>
+        <div style="color:var(--text-muted);font-size:0.7rem">${escHtml(d.author)} &middot; ${fmtDateTime(d.time)}</div>
+        ${bnames ? `<div style="margin-top:0.25rem">${bnames.map(n => `<span class="label-tag" style="font-size:0.65rem;background:rgba(99,102,241,0.12);color:var(--accent)">${escHtml(n)}</span>`).join(' ')}</div>` : ''}
+        <div style="color:var(--text-muted);font-size:0.7rem;margin-top:0.15rem">Parents: ${d.parents.join(', ')}</div>
+      `;
+      tooltip.style.display = "block";
+      const rect = container.getBoundingClientRect();
+      tooltip.style.left = Math.min(event.clientX - rect.left + 12, rect.width - 290) + "px";
+      tooltip.style.top = Math.max(event.clientY - rect.top - 10, 0) + "px";
+    }).on("mouseleave", () => { tooltip.style.display = "none"; });
+
+    // Simulation tick
+    _repoSimulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+      node.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+
+    // Fit view
+    setTimeout(() => {
+      const bounds = g.node()?.getBBox();
+      if (bounds) {
+        const scale = Math.min(width / bounds.width, height / bounds.height, 1.5);
+        const tx = width / 2 - (bounds.x + bounds.width / 2) * scale;
+        const ty = height / 2 - (bounds.y + bounds.height / 2) * scale;
+        svg.transition().duration(500).call(_repoZoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+      }
+    }, 1000);
+  } catch (e) {
+    container.innerHTML = `<div class="empty"><p>Failed to load graph: ${escHtml(e.message)}</p></div>`;
+  }
 }
+
+function zoomRepo(action) {
+  // unused reset - the Fit button auto-fits on draw
+}
+
+window.addEventListener("resize", () => {
+  const container = document.getElementById("repo-graph");
+  if (container && container.querySelector("svg")) {
+    const svg = container.querySelector("svg");
+    svg.setAttribute("width", container.clientWidth || 800);
+  }
+});
 
 // ── Commits & PRs page ────────────────────────────────────
 async function loadCommits(page) {

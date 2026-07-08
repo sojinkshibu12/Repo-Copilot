@@ -272,6 +272,65 @@ async def list_pulls(
         return {"items": [], "total": 0, "page": page, "per_page": per_page}
 
 
+@app.get("/api/repo/network", tags=["Repository"])
+async def repo_network():
+    """Return the full branch/commit DAG for a visual repo graph."""
+    try:
+        from core.github import GitHubClient
+        gh = GitHubClient()
+        pygh_repo = gh.get_repo()
+
+        # Get all branches with their latest commit
+        branches_raw = list(pygh_repo.get_branches())
+        default = pygh_repo.default_branch
+
+        # Collect the DAG: for each branch, trace back commits
+        import collections
+        dag = collections.defaultdict(list)
+        branch_info = {}
+        max_commits = 100
+
+        for b in branches_raw:
+            branch_info[b.name] = {
+                "name": b.name,
+                "is_default": b.name == default,
+                "sha": b.commit.sha[:8],
+                "full_sha": b.commit.sha,
+                "message": b.commit.commit.message.strip().split("\n")[0],
+                "author": b.commit.commit.author.name or str(b.commit.commit.author),
+                "time": b.commit.commit.author.date.isoformat() + "Z" if b.commit.commit.author.date else None,
+            }
+            # Trace commits for this branch
+            seen = set()
+            for c in pygh_repo.get_commits(sha=b.name)[:max_commits]:
+                if c.sha in seen:
+                    break
+                seen.add(c.sha)
+                parents = [p.sha[:8] for p in c.parents[:2]]
+                dag[c.sha[:8]] = {
+                    "sha": c.sha[:8],
+                    "full_sha": c.sha,
+                    "message": c.commit.message.strip().split("\n")[0],
+                    "author": c.commit.author.name or str(c.commit.author),
+                    "time": c.commit.author.date.isoformat() + "Z" if c.commit.author.date else None,
+                    "parents": parents,
+                    "branches": [],
+                }
+
+        # Tag commits with branch names
+        for bname, binfo in branch_info.items():
+            if binfo["sha"] in dag:
+                dag[binfo["sha"]]["branches"].append(bname)
+
+        return {
+            "branches": list(branch_info.values()),
+            "commits": list(dag.values()),
+        }
+    except Exception as e:
+        logger.error("Failed to build network: %s", e)
+        return {"branches": [], "commits": []}
+
+
 # ── Logs ──────────────────────────────────────────────────────────
 
 _LOG_BUFFER: list[dict] = []
